@@ -1,0 +1,51 @@
+---
+title: Exercícios resolvidos
+description: Os oito exercícios da Aula 3, com resolução
+---
+
+<Callout title="Formato">
+  Cada resolução está recolhida num acordeão, para que o exercício possa ser resolvido antes da conferência.
+</Callout>
+
+<Accordions>
+  <Accordion title="1. Invertendo uma rede de Feistel">
+    Uma rodada é `L_i = R_(i-1)` e `R_i = L_(i-1) XOR f(R_(i-1), K_i)`. Conhecidos `L_i`, `R_i` e `K_i`: `R_(i-1) = L_i` e `L_(i-1) = R_i XOR f(L_i, K_i)`. Como `f(L_i, K_i)` é recalculado (e não invertido), vale para **qualquer** f.
+
+    Para 3 rodadas, dado `(L3, R3)`:
+
+    ```
+    R2 = L3     L2 = R3 XOR f(L3, K3)
+    R1 = L2     L1 = R2 XOR f(L2, K2)
+    R0 = L1     L0 = R1 XOR f(L1, K1)
+    ```
+  </Accordion>
+  <Accordion title="2. Lendo uma S-box do DES">
+    Entrada `011011`: bits externos `01` (linha 1), bits internos `1101` (coluna 13), S1[1][13] = 5 = `0101`.
+
+    Entrada `100110`: bits externos `10` (linha 2), bits internos `0011` (coluna 3). A linha 2 de S1 é `4 1 14 8 13 6 2 11 15 12 9 7 3 10 5 0`, e a coluna 3 vale 8, ou seja `1000`.
+  </Accordion>
+  <Accordion title="3. Multiplicação em GF(2^8)">
+    `13 = 10 XOR 02 XOR 01`. Logo `{57}·{13} = {57}·{10} XOR {57}·{02} XOR {57}·{01} = 07 XOR ae XOR 57`. Primeiro `07 XOR ae = a9`, depois `a9 XOR 57 = fe`. Resposta: **`{fe}`**.
+  </Accordion>
+  <Accordion title="4. Uma coluna de MixColumns">
+    Primeira linha da matriz: `02 03 01 01`. `{02}·{db} XOR {03}·{13} XOR {53} XOR {45} = ad XOR 35 XOR 53 XOR 45`. `ad XOR 35 = 98`, `98 XOR 53 = cb`, `cb XOR 45 = 8e`. Resposta: **`8e`**.
+  </Accordion>
+  <Accordion title="5. Difusão no AES">
+    Após 1 rodada: **4 bytes** (MixColumns tem número de ramificação 5, então 1 byte de entrada ativa 4 de saída na coluna). Após 2 rodadas: **16 bytes** (ShiftRows distribui os 4 bytes por 4 colunas distintas, e o MixColumns de cada coluna espalha cada um pelos 4 bytes dela).
+  </Accordion>
+  <Accordion title="6. O limite da trilha larga">
+    Probabilidade máxima de uma trilha de 4 rodadas: `(2^-6)^25 = 2^-150`. Um ataque diferencial clássico precisaria de cerca de `2^150` pares escolhidos, **mais que os `2^128` blocos que existem**. Logo a diferencial clássica é inútil contra o AES completo.
+  </Accordion>
+  <Accordion title="7. Orçamento do bloco">
+    Bloco de 64 bits: colisões prováveis em `2^32` blocos de 8 bytes, ou `2^35` bytes = 32 GiB. Bloco de 128 bits: `2^64` blocos de 16 bytes, ou `2^68` bytes = 256 EiB.
+
+    Uma conexão de 1 Gbit/s transmite `125 MB/s * 86400 s` por dia, cerca de **10,8 TB** (cerca de 9,8 TiB). Os 32 GiB do bloco de 64 bits são atingidos em cerca de **4,6 minutos** (275 s). O limite do bloco de 128 bits nunca é atingido.
+  </Accordion>
+  <Accordion title="8. Projeto para um microcontrolador">
+    **O que ajuda no AES:** opera em bytes (compatível com 8 bits), a S-box cabe em 256 bytes (em ROM, sem usar a RAM de 2 KB), o MixColumns usa só `xtime` e XOR, e as chaves de rodada podem ser calculadas sob demanda, sem guardar a tabela inteira.
+
+    **O que atrapalha no DES:** as permutações de bits (E, P, IP, PC-1, PC-2) exigem deslocamentos e máscaras em cada passo em um processador de 8 bits, e o 3DES triplica o custo.
+
+    **Implementação:** a S-box por tabela em ROM (256 bytes), o MixColumns calculado (`xtime`) e a expansão de chave sob demanda.
+  </Accordion>
+</Accordions>

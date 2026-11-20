@@ -1,0 +1,35 @@
+---
+title: Os quatro limites do OTP
+description: Por que ninguém cifra a Internet com One-Time Pad
+---
+
+<Accordions type="single">
+  <Accordion title="1. A chave tem o tamanho da mensagem">
+    Cifrar 1 GB de vídeo exige 1 GB de chave aleatória, combinada antes e guardada em segredo. Se há um canal seguro para levar a chave, ele poderia levar a própria mensagem. O ganho é só de momento: a chave viaja antes. Funcionou em canais diplomáticos e militares, com volume pequeno.
+  </Accordion>
+  <Accordion title="2. A chave só pode ser usada uma vez">
+    `c1 XOR c2 = (m1 XOR k) XOR (m2 XOR k) = m1 XOR m2`. A chave some, e sobra o XOR de duas mensagens com a **redundância da língua**. Desliza-se uma palavra provável ("ATAQUE", espaço) e aparecem trechos legíveis (crib dragging). Conhecendo uma mensagem, a outra sai inteira: `m2 = c1 XOR c2 XOR m1`.
+  </Accordion>
+  <Accordion title="3. Sigilo não é integridade">
+    `(c XOR D) XOR k = m XOR D`. Sem conhecer a chave, o atacante altera o ciphertext e a mensagem muda **do mesmo jeito**. Num formato conhecido, "PAGAR 0100" vira "PAGAR 9100". A segurança perfeita não foi violada (ele não aprendeu nada), ele apenas modificou. Confidencialidade e integridade são objetivos diferentes.
+  </Accordion>
+  <Accordion title="4. A chave precisa ser realmente aleatória">
+    Com chave previsível, o espaço efetivo encolhe e a prova deixa de valer. O Debian OpenSSL (2006 a 2008) tinha só cerca de 32 mil chaves possíveis. Testes estatísticos (NIST SP 800-22 e 800-90B) detectam defeitos, mas **não provam** aleatoriedade.
+  </Accordion>
+</Accordions>
+
+## Casos reais de reuso
+
+| Caso | O que se repetiu |
+|------|------------------|
+| Venona (anos 1940) | Páginas de blocos de uso único soviéticos, cerca de 3 mil mensagens decifradas em parte |
+| MS-PPTP (1998) | A mesma chave RC4 nas duas direções da conexão |
+| WEP (Wi-Fi) | Vetor de inicialização de 24 bits que se repetia em pouco tempo |
+
+## Onde o OTP ainda aparece
+
+Comunicações de altíssimo valor e baixo volume (militar, diplomático, bancário), combinadas com **distribuição quântica de chaves** (QKD, como BB84), limitadas pela taxa de geração de chave. QKD resolve só o **transporte** da chave, via o teorema da não clonagem. Se a chave do OTP é protegida por uma cifra simétrica comum, a cadeia deixa de ser perfeita.
+
+<Callout title="Aplicação no artigo" type="warn">
+  O limite 3 antecipa uma ideia central: **sigilo não basta**. Por isso o TLS usa AEAD (cifra e autentica juntos) e por isso a autenticação também precisa migrar para pós-quântico, em etapa posterior.
+</Callout>

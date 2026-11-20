@@ -1,0 +1,32 @@
+---
+title: Aulas
+description: Visão geral das aulas e do estado de cobertura
+---
+
+Cada aula tem uma pasta própria. A estrutura é a mesma em todas: um **resumo** com objetivos, páginas curtas por tópico, **exercícios resolvidos** (quando a aula tem) e **perguntas de revisão**.
+
+## Cobertura
+
+| Aula | Tema | Situação |
+|------|------|----------|
+| [Aula 1](/docs/aulas/aula-01-criptografia-moderna) | Criptografia moderna: panorama, transição pós-quântica, engenharia da migração | Coberta |
+| [Aula 2](/docs/aulas/aula-02-criptografia-simetrica-1) | Criptografia simétrica 1: paradigma, segurança perfeita e computacional, DES | Coberta |
+| [Aula 3](/docs/aulas/aula-03-cifras-de-bloco-des-aes) | Cifras de bloco: do DES ao AES | Coberta |
+| [Aula 4](/docs/aulas/aula-04-modos-de-operacao-e-aead) | Modos de operação e AEAD (ECB, CBC, CTR, AES-GCM, ChaCha20-Poly1305) | Coberta |
+| Aulas seguintes | A serem adicionadas conforme o semestre avança | Pendente |
+
+## Como se conectam
+
+O percurso das quatro primeiras aulas vai do **vocabulário** (o que é uma cifra, contra quem ela se defende) à **peça usada na prática** (AES em modo autenticado, como no TLS 1.3), passando por um caso histórico de migração (DES) e pelo panorama pós-quântico.
+
+```
+Aula 1  panorama e migração PQ  ───────────────────────────────┐
+Aula 2  paradigma → segurança perfeita → computacional → DES   │  tema da pesquisa:
+Aula 3  princípios de projeto → DES revisitado → AES           ├─ troca de chaves no TLS 1.3
+Aula 4  modos de operação → AEAD (GCM, ChaCha20-Poly1305)  ────┘
+```
+
+<Cards>
+  <Card title="Mapa de conceitos" href="/docs/aulas/conceitos">Temas que atravessam várias aulas.</Card>
+  <Card title="Glossário" href="/docs/referencia/glossario">Siglas e termos em uma linha.</Card>
+</Cards>

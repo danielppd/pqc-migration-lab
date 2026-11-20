@@ -1,0 +1,80 @@
+---
+title: Princípios de projeto
+description: Confusão, difusão, rodadas, Feistel contra SPN e a necessidade de não linearidade
+---
+
+As ideias de Shannon (1949) organizam o DES e o AES: **confusão** e **difusão**, repetidas por várias rodadas.
+
+## Confusão e difusão
+
+<Tabs items={['Difusão', 'Confusão']}>
+  <Tab value="Difusão">
+    Cada bit de saída deve depender de muitos bits de entrada. Uma mudança pequena no texto claro se espalha por todo o ciphertext. **Componentes:** permutações e misturas lineares.
+  </Tab>
+  <Tab value="Confusão">
+    A relação entre a chave e o ciphertext deve ser complexa e não linear, para que pares (m, c) não permitam resolver a chave por álgebra. **Componentes:** S-boxes.
+  </Tab>
+</Tabs>
+
+| | DES | AES |
+|---|-----|-----|
+| Difusão | Expansão E, permutação P, troca de metades | ShiftRows, MixColumns |
+| Confusão | 8 S-boxes de 6 para 4 bits | SubBytes: 16 cópias de uma S-box de 8 bits |
+
+## Cifras produto: rodadas simples, repetidas
+
+```
+m → [Rodada 1] → [Rodada 2] → ... → [Rodada r] → c
+         ↑            ↑                  ↑
+    Agenda de chaves: k → K1, K2, ..., Kr
+```
+
+| Elemento | Papel |
+|----------|-------|
+| Rodada | Transformação simples e rápida, fraca sozinha. Mesma estrutura em todas as rodadas |
+| Subchave | Cada rodada recebe sua chave derivada. Sem ela, as rodadas seriam idênticas e exploráveis |
+| Margem | Rodadas suficientes para os melhores ataques conhecidos, mais folga para os desconhecidos |
+
+Rodadas são a moeda de troca mais direta entre segurança e desempenho: cada uma custa tempo, e cada uma que falta reduz a margem.
+
+## Duas arquiteturas: Feistel e SPN
+
+| | Feistel (DES) | SPN (AES) |
+|---|---------------|-----------|
+| Estrutura | Divide o bloco em L e R. `L_i = R_(i-1)`, `R_i = L_(i-1) XOR f(R_(i-1), K_i)` | Todo o bloco passa por S-boxes (substituição) e por uma camada linear (permutação e mistura), seguidas da subchave |
+| f ou S-box precisa ser invertível? | Não | Sim |
+| Decifração | Mesmo circuito, subchaves invertidas | Componentes inversos, outro circuito |
+| Bits alterados por rodada | Metade do bloco | Bloco inteiro |
+| Rodadas típicas | Mais (DES: 16) | Menos (AES: 10 a 14) |
+| Liberdade de projeto | Grande na função f | Exige componentes com inversa eficiente |
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/c/cd/SubstitutionPermutationNetwork2.png"
+  alt="Rede de substituição e permutação com S-boxes e camadas de permutação"
+  caption="Rede de substituição e permutação: camadas de S-boxes alternadas com permutações, cada uma misturada com uma subchave."
+  credit="GaborPete, Wikimedia Commons, CC BY-SA 3.0"
+  href="https://commons.wikimedia.org/wiki/File:SubstitutionPermutationNetwork2.png"
+/>
+
+## Por que componentes não lineares
+
+Permutações de bits, XOR com a chave e multiplicações por matrizes fixas são **lineares sobre GF(2)**. Uma cifra só com essas operações é um sistema de equações lineares: com alguns pares (m, c), a chave sai por eliminação gaussiana. Sem não linearidade, a cifra cai.
+
+| | DES | AES |
+|---|-----|-----|
+| Tamanho da S-box | 6 para 4 bits | 8 para 8 bits |
+| Quantidade | 8 S-boxes diferentes | 1 S-box, 16 usos por rodada |
+| Memória por tabela | 64 entradas de 4 bits | 256 entradas de 8 bits |
+| Melhor probabilidade diferencial | 1/4 por S-box | 1/64 por S-box |
+
+S-boxes maiores protegem mais por unidade, mas custam mais memória. O AES pôde usar 8 bits porque a memória do ano 2000 permitia.
+
+## Agenda de chaves e margem
+
+- A **agenda de chaves** deriva K1, ..., Kr da chave mestra. Deve ser rápida e espalhar cada bit da chave por várias rodadas.
+- **Assimetria entre rodadas:** subchaves diferentes impedem ataques que exploram rodadas idênticas (ataques de deslizamento). O AES usa constantes de rodada para isso.
+- **Margem:** rodadas da cifra menos rodadas que o melhor ataque consegue quebrar. É a reserva contra o que ainda não foi descoberto.
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. A distinção entre **estrutura de segurança** (rodadas, componentes não lineares) e **parâmetros** (chave, bloco, rodadas) é a mesma que organiza a análise de migração: o que envelhece costuma ser o parâmetro, não a estrutura.
+</Callout>

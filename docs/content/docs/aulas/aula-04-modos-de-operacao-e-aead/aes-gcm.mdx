@@ -1,0 +1,63 @@
+---
+title: AES-GCM
+description: CTR para o sigilo, GHASH para a autenticação, uma única chave AES
+---
+
+**Galois/Counter Mode:** o CTR cuida do sigilo, o GHASH cuida da autenticação, e uma única chave AES serve para tudo.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/1/19/Galois_Counter_Mode.svg"
+  alt="Diagrama do modo Galois/Counter Mode com cifração CTR e GHASH"
+  caption="GCM: o contador é cifrado para gerar o fluxo de chave, e os blocos de texto cifrado alimentam o GHASH, cuja saída gera a etiqueta."
+  credit="Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:Galois_Counter_Mode.svg"
+/>
+
+## Visão geral
+
+```
+J0 = IV ǁ 0...01                       (bloco de contador inicial)
+H  = EK(0^128)                         (chave do GHASH)
+Sigilo:        CTR a partir de J0 + 1
+Autenticação:  GHASH sobre A, C e L, mascarado por EK(J0)
+T = GHASH_H(A, C) XOR EK(J0)           (etiqueta de 128 bits)
+```
+
+`L` é o bloco com os comprimentos de `A` e de `C`, em bits.
+
+## GHASH: um polinômio avaliado em H
+
+Os blocos são os **coeficientes de um polinômio** avaliado no ponto secreto `H`, no corpo GF(2^128) (polinômio `x^128 + x^7 + x^2 + x + 1`). Para dados associados de 1 bloco e texto cifrado de 2 blocos, `S = A·H^4 XOR C1·H^3 XOR C2·H^2 XOR L·H`. A máscara `EK(J0)` esconde `S`; sem ela, a etiqueta revelaria relações sobre `H`.
+
+| Aspecto | Detalhe |
+|---------|---------|
+| Soma | XOR |
+| Produto | Multiplicação sem vai-um, depois redução |
+| **Por que é seguro** | Duas mensagens distintas de n blocos colidem só se `H` é raiz de um polinômio não nulo de grau n: probabilidade no máximo `n / 2^128` |
+| **Por que é rápido** | Só multiplicações por `H`. Processadores x86 têm a instrução `PCLMULQDQ` (2010), e o ARMv8 tem `PMULL` |
+
+**Multiplicar em GF(2^128):** desloca-se e soma-se. Se o último bit é 1, desloca-se um bit à direita e faz-se XOR com `R = e1 00 ... 00`. O algoritmo do [SP 800-38D](https://csrc.nist.gov/pubs/sp/800/38/d/final) percorre os 128 bits do operando.
+
+## A parte de sigilo é o CTR
+
+A cifração começa em `J0 + 1`, exatamente como no CTR. O que o GHASH acrescenta é que qualquer alteração em `A`, `C` ou no IV passa a ser **detectada**: a etiqueta recalculada não confere e a decifração é recusada, sem liberar nenhum byte.
+
+## Limites e cuidados
+
+| Item | Limite |
+|------|--------|
+| IV | 96 bits no caso recomendado, com `J0 = IV ǁ 0...01` |
+| Tamanho máximo | Até `2^39 - 256` bits por mensagem, cerca de 64 GiB (o contador tem 32 bits) |
+| IV aleatório | No máximo `2^32` cifrações por chave (SP 800-38D), por causa do paradoxo do aniversário |
+| Etiqueta | 128 bits |
+| Implementação | Tempo constante com `PCLMULQDQ` |
+
+O GCM é rápido e seguro **quando o nonce é único**. É frágil quando não é (ver página seguinte).
+
+<Video id="-fpVv_T4xwA" title="AES GCM (Galois Counter Mode)" meta="Computerphile, 18 min, inglês" />
+
+<Video id="g_eY7JXOc8U" title="What is GCM? Galois Counter Mode" meta="David Wong, 16 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="success">
+  `TLS_AES_128_GCM_SHA256` e `TLS_AES_256_GCM_SHA384` são as suítes mais comuns do TLS 1.3. Em qualquer conexão que use o grupo `X25519MLKEM768`, os **dados** continuam protegidos por AES-GCM: o que muda com a migração é só a origem da chave.
+</Callout>

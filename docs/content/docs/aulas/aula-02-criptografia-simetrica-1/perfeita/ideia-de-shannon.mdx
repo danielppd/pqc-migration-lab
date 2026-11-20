@@ -1,0 +1,47 @@
+---
+title: A ideia de segurança perfeita
+description: O ciphertext não pode ensinar nada a quem não tem a chave (Shannon, 1949)
+---
+
+O adversário **já sabe algo** antes de ver o ciphertext: o idioma, o contexto, as respostas prováveis. Isso é uma **distribuição a priori** sobre as mensagens.
+
+```
+Antes de ver c:   Pr[ataque amanhã] = 0,7
+                      │ observa c
+Depois de ver c:  Pr[ataque amanhã] = 0,7     (não mudou)
+```
+
+A cifra é **perfeita** quando ver c não muda essa distribuição. O adversário, mesmo com poder ilimitado, termina exatamente onde começou.
+
+## Três formas de dizer a mesma coisa
+
+<Tabs items={['Probabilidade', 'Distribuição do ciphertext', 'Jogo']}>
+  <Tab value="Probabilidade">
+    `Pr[M = m | C = c] = Pr[M = m]` para toda distribuição sobre M, toda mensagem m e todo ciphertext c. Ver c não muda o que se sabe sobre m.
+  </Tab>
+  <Tab value="Distribuição do ciphertext">
+    `Pr[Enc_K(m0) = c] = Pr[Enc_K(m1) = c]` para quaisquer m0, m1, c. A distribuição do ciphertext é a mesma para qualquer mensagem. **É a mais fácil de usar em provas.**
+  </Tab>
+  <Tab value="Jogo">
+    O adversário escolhe m0 e m1 (mesmo tamanho), o desafiante sorteia a chave e um bit b e entrega `c = Enc_k(m_b)`. O adversário chuta b'. A cifra é perfeita se `Pr[adversário vence] = 1/2` exato, o mesmo que chutar.
+  </Tab>
+</Tabs>
+
+O formato de **jogo** é o que se repete em todas as definições do curso, inclusive as computacionais.
+
+## Segurança é do esquema inteiro, não da operação
+
+<Accordions type="single">
+  <Accordion title="Mensagens de 1 byte com chave de 1 byte: perfeita">
+    Chave k uniforme em 256 valores, `c = m XOR k`. Para qualquer m e c existe exatamente uma chave, `k = m XOR c`. Logo `Pr[Enc_K(m) = c] = 1/256` para todo m e c.
+  </Accordion>
+  <Accordion title="Mensagens de 2 bytes com a mesma chave de 1 byte: quebrada">
+    O adversário escolhe `m0 = 41 41` (bytes iguais) e `m1 = 41 42`. Os dois bytes do ciphertext são iguais se e somente se b = 0. O adversário vence com probabilidade 1.
+  </Accordion>
+</Accordions>
+
+A mesma operação (XOR) pode ser perfeita ou trivialmente quebrável, dependendo do espaço de mensagens.
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento sem aplicação direta. A segurança perfeita serve de régua: ML-KEM, AES e demais esquemas representam trocas conscientes de "perfeito" por "prático".
+</Callout>

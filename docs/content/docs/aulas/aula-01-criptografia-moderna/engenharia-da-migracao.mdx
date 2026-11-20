@@ -1,0 +1,59 @@
+---
+title: Engenharia da migração
+description: O tema da pesquisa, conforme apresentado na Aula 1
+---
+
+O slide 45 da Aula 1 lista "engenharia da migração" como categoria própria de problema em aberto: **inventário, agilidade, dispositivos restritos, validação de longo prazo, certificados**. O slide 47 diz que **a migração é um problema de sistemas**, não só de matemática.
+
+## Quatro barreiras
+
+<Cards>
+  <Card title="Dispositivos restritos">
+    Smart cards, sensores e controladores com poucos KB de RAM.
+  </Card>
+  <Card title="Longo prazo">
+    Documentos e firmware verificáveis por 20 a 30 anos.
+  </Card>
+  <Card title="Protocolos rígidos">
+    DNSSEC, IKEv2 e protocolos industriais com limites fixos de tamanho.
+  </Card>
+  <Card title="Agilidade">
+    Híbridos com combinadores provados e negociação sem rebaixamento.
+  </Card>
+</Cards>
+
+## Os números viram perguntas de engenharia
+
+| Item | Clássico | Pós-quântico |
+|------|----------|--------------|
+| Assinatura | Ed25519: 64 B | ML-DSA-44: 2.420 B |
+| Key share no handshake | X25519: 32 B | Híbrido: 1.216 B |
+| Autenticação em cadeia TLS | n/d | cerca de 14,7 KB |
+| Chave pública UOV | n/d | 278 KB |
+
+> Cada número vira uma pergunta de engenharia: **onde esse tamanho cabe e onde não cabe?**
+
+## Agilidade e inventário
+
+**Agilidade criptográfica** é trocar algoritmos sem reescrever o sistema. Ela **pressupõe inventário**: saber onde cada primitiva está, o que se chama **CBOM** (Cryptographic Bill of Materials). A maioria das organizações não tem inventário completo do uso de criptografia, e **o prazo do NIST já está correndo**.
+
+<Video id="UsCwetDZSC4" title="Post-Quantum Cryptography Migration Planning Explained (Part 1)" meta="Encryption Consulting, 18 min, inglês" />
+
+## Onde as quebras realmente acontecem
+
+| Tema | Exemplo |
+|------|---------|
+| Canais laterais | KyberSlash (2024): uma divisão dependente de segredo vazava a chave de ML-KEM em várias bibliotecas. FN-DSA usa amostragem gaussiana em ponto flutuante, difícil de proteger |
+| Verificação formal | Implementações de ML-KEM com prova de correção e tempo constante (libcrux, mlkem-native) já estão em produção. O Triple Ratchet do Signal foi analisado formalmente |
+
+## A frase que justifica o tema
+
+> Muitos problemas urgentes não exigem matemática nova: exigem medição cuidadosa, engenharia e boa documentação. É onde um artigo de graduação pode contribuir de verdade. (slide 49, Aula 1)
+
+<Callout title="Aplicação no artigo" type="success">
+  Página-mãe da pesquisa. A pergunta central ("onde o tamanho do híbrido cabe e onde não cabe?") deriva da questão apresentada na Aula 1 (slide 47). Os experimentos E1, E2 e E3 são três respostas medidas a ela.
+</Callout>
+
+<Cards>
+  <Card title="Ver o escopo do artigo" href="/docs/artigo/escopo" />
+</Cards>

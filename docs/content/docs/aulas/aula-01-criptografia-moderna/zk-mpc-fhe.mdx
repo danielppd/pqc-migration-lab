@@ -1,0 +1,34 @@
+---
+title: ZK, MPC e FHE em uma frase cada
+description: Só para reconhecer as três técnicas de computar sobre dados protegidos
+---
+
+Estas técnicas **não** são o foco do artigo. A página serve de referência de reconhecimento.
+
+| Técnica | Pergunta que responde | Exemplo |
+|---------|----------------------|---------|
+| **ZK** (conhecimento zero) | Provar que algo é verdade sem revelar o porquê | Provas de bloco do Ethereum, prova de "maior de 18" |
+| **MPC** (computação multipartidária) | Computar em conjunto sem revelar as entradas | Assinatura por limiar (FROST, RFC 9591), custódia |
+| **FHE** (criptografia totalmente homomórfica) | Computar sobre dado que o servidor nunca vê | Apple Live Caller ID, Edge Password Monitor |
+
+## Como escolher
+
+```
+Alguém precisa verificar uma afirmação sobre dado que não vê?   sim → ZK
+Há várias partes, cada uma com entrada própria, sem confiança?  sim → MPC
+Um servidor computa para um cliente que guarda a chave?         sim → FHE
+```
+
+## Pontos da Aula 1
+
+- **ZK:** completude, solidez e conhecimento zero. Com Fiat-Shamir, o desafio vira um hash e a prova vira uma mensagem única (SNARK). Groth16 e PLONK não são pós-quânticos, STARKs (baseados em hash) são plausivelmente PQ.
+- **MPC:** compartilhamento aditivo de segredo, circuitos embaralhados (Yao). MPC genérico ainda custa caro, os sucessos são funções específicas. Lacuna aberta: versões por limiar eficientes de ML-DSA.
+- **FHE:** BGV/BFV (inteiros), CKKS (reais aproximados), TFHE (bits). Todos baseados em (R)LWE, portanto pós-quânticos. Em CPU, computar cifrado custa várias ordens de grandeza a mais.
+
+## A sugestão de artigo da 1ª aula
+
+A Aula 1 sugere, como tema de artigo de baixa complexidade, comparar **scikit-learn** com **Concrete ML** (Zama), que replica a sintaxe e permite inferência privada com FHE (treino em claro, inferência cifrada, custo cerca de 10 vezes). Não é o tema desta pesquisa, mas é uma alternativa documentada.
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento sem aplicação direta no artigo. Uma conexão relevante: ZK é usado para provar afirmações sobre ataques quânticos sem revelar os circuitos (prova de conhecimento zero para ECDLP-256, citada na Aula 1).
+</Callout>

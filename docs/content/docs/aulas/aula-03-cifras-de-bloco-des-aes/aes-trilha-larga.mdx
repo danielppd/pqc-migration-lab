@@ -1,0 +1,54 @@
+---
+title: Difusão e a estratégia da trilha larga
+description: Como o AES transforma o projeto em argumento demonstrável
+---
+
+## Difusão completa em duas rodadas
+
+Se um único byte do estado de entrada é alterado:
+
+| Momento | Bytes alterados | Mecanismo |
+|---------|-----------------|-----------|
+| Após a rodada 1 | 4 | MixColumns espalha o byte pela sua coluna |
+| Após a rodada 2 | 16 | ShiftRows distribui esses 4 bytes por 4 colunas, e MixColumns espalha cada um |
+
+Medido em 2000 pares aleatórios: 4,0 bytes diferentes após 1 rodada e 16,0 após 2. **No DES, a difusão completa só aparece perto da 5ª rodada**, porque cada rodada altera metade do bloco.
+
+Em termos de bits: o AES chega a 50% de bits diferentes já na rodada 2, contra a rodada 5 do DES. A difusão rápida vem de atuar no bloco inteiro em cada rodada, contra metade no Feistel. O resultado são menos rodadas (10 contra 16) e margem maior.
+
+## A estratégia da trilha larga
+
+O AES transforma o projeto em um **argumento**: um limite inferior para o número de S-boxes ativas em uma trilha de ataque.
+
+| Rodadas | S-boxes ativas, no mínimo |
+|---------|---------------------------|
+| 1 | 1 |
+| 2 | 5 |
+| 3 | 9 |
+| 4 | 25 |
+
+**Por que 25:** ShiftRows espalha cada coluna por quatro colunas, e MixColumns, com ramificação 5, ativa muitos bytes em cada uma. Em 4 rodadas, `5 * 5 = 25`.
+
+## O limite, em números
+
+| Ataque | Cálculo | Resultado |
+|--------|---------|-----------|
+| Diferencial | `(2^-6)^25` | `2^-150` |
+| Linear | `(2^-3)^25` | Correlação `2^-75`, cerca de `2^150` textos |
+
+Ambos passam dos `2^128` blocos que existem. O DES dependia de S-boxes ajustadas em segredo, e o AES tem um limite **demonstrável** a partir de propriedades simples da S-box e do MixColumns.
+
+## Por que 10 rodadas
+
+<Steps>
+  <Step>**Difusão completa:** 2 rodadas (qualquer byte de entrada afeta todos os bytes de saída).</Step>
+  <Step>**Trilha larga:** 4 rodadas (pelo menos 25 S-boxes ativas, trilhas com probabilidade de no máximo `2^-150`).</Step>
+  <Step>**Alcance dos melhores ataques em 1998:** 6 rodadas. Margem de projeto: 4 rodadas.</Step>
+  <Step>**Hoje:** os melhores ataques em versões reduzidas do AES-128 chegam a 7 rodadas, com custo impraticável. Margem de 3 rodadas.</Step>
+</Steps>
+
+Cada rodada custa cerca de 10% do tempo. Mais rodadas compram margem, menos rodadas compram velocidade. Dez foi o ponto escolhido.
+
+<Callout title="Aplicação no artigo" type="info">
+  O conceito de **margem de segurança** é central na migração pós-quântica: a avaliação do ML-KEM e das assinaturas candidatas é feita pela distância entre o melhor ataque conhecido e os parâmetros escolhidos, e o episódio do HAWK (Aula 1) mostra o que acontece quando essa distância é menor que o imaginado.
+</Callout>

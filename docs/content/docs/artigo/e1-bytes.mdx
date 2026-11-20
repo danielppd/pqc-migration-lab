@@ -1,0 +1,50 @@
+---
+title: E1, bytes do handshake
+description: O experimento exploratório já feito e o resultado inesperado
+---
+
+**Código:** [`experiments/e1-bytes-handshake`](https://github.com/danielppd/pqc-migration-lab/tree/main/experiments/e1-bytes-handshake) no repositório.
+
+Sobe um servidor TLS local, conecta com cada grupo de troca de chaves e soma os bytes das mensagens de handshake em cada direção. Requer **OpenSSL 3.5 ou superior** (o `openssl` do macOS é LibreSSL e não serve).
+
+## Como rodar
+
+```bash
+brew install openssl@3
+cd experiments/e1-bytes-handshake
+./experimento-exploratorio.sh
+```
+
+## Resultado (OpenSSL 3.6.4, macOS arm64, certificado ECDSA P-256)
+
+| Grupo | ClientHello (B) | ServerHello (B) | Total do cliente (B) | Total do servidor (B) |
+|-------|-----------------|-----------------|----------------------|-----------------------|
+| X25519 | 210 | 122 | 262 | 658 |
+| MLKEM768 | 1356 | 1178 | 1408 | 1729 |
+| X25519MLKEM768 | 1388 | 1210 | 1440 | 1759 |
+| SecP256r1MLKEM768 | 1421 | 1243 | 1473 | 1793 |
+
+## O resultado inesperado
+
+O aumento do ClientHello é **+1178 B**, mas o key share do híbrido é **1184 B** maior (38 B contra 1222 B). Os **6 bytes de diferença** são a extensão `ec_point_formats`, que o ClientHello clássico envia e o híbrido não. Foi descoberto com:
+
+```bash
+openssl s_client -connect localhost:PORTA -tls1_3 -groups X25519 -trace
+```
+
+O resultado mostra que "o custo da migração" não é só somar tamanhos de chave, e que observar o tráfego real corrige a conta feita de cabeça.
+
+## Variação entre execuções
+
+ClientHello e ServerHello são estáveis, mas o total do servidor oscilou 1 a 2 bytes entre duas execuções (por exemplo 658 e 657 para X25519). A hipótese de trabalho, **ainda a confirmar**, é que a assinatura ECDSA do CertificateVerify tem tamanho variável em DER (70 a 72 bytes) e o script gera um certificado novo a cada execução. É um exemplo de por que o desenho experimental exige repetições, e não uma medida única.
+
+## Ameaças à validade
+
+- Um único certificado, uma única biblioteca, loopback.
+- Os bytes são de **mensagens de handshake**, sem cabeçalho de registro TLS, TCP e IP. A contagem em pacotes de rede pode ser conferida com `tcpdump`.
+
+## Para entender o que se mede
+
+<Video id="06Kq50P01sI" title="Wiresharking TLS: TLS 1.2 and TLS 1.3 Handshake" meta="Hussein Nasser, 17 min, inglês" />
+
+<Video id="JA0vaIb4158" title="TLS 1.3 Handshake: many changes from prior versions" meta="Practical Networking, 18 min, inglês" />

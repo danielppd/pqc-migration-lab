@@ -1,0 +1,55 @@
+---
+title: Padrões NIST e prazos
+description: Os algoritmos escolhidos e as datas que forçam a migração
+---
+
+## O portfólio de padrões (situação em nov/2026, segundo o material da disciplina)
+
+| Algoritmo | Documento | Base | Papel |
+|-----------|-----------|------|-------|
+| **ML-KEM** (Kyber) | FIPS 203 | Reticulados | KEM principal |
+| ML-DSA (Dilithium) | FIPS 204 | Reticulados | Assinatura principal |
+| SLH-DSA (SPHINCS+) | FIPS 205 | Hash | Assinatura conservadora |
+| FN-DSA (Falcon) | FIPS 206 | NTRU | Assinatura compacta, difícil de implementar (em elaboração) |
+| HQC | em elaboração | Códigos | KEM reserva (selecionado em mar/2025) |
+| LMS, XMSS | SP 800-208 | Hash | Assinatura com estado, firmware |
+
+Texto oficial: [FIPS 203 no NIST](https://csrc.nist.gov/pubs/fips/203/final).
+
+## Prazos
+
+<Steps>
+  <Step>
+    **NIST IR 8547** (versão final em 27/10/2026, segundo o material da disciplina): RSA e ECC **depreciados após 2030 e proibidos após 2035**.
+  </Step>
+  <Step>
+    **Sistemas federais de alto impacto:** troca de chaves PQ até 31/12/2030 e assinaturas PQ até 31/12/2031.
+  </Step>
+  <Step>
+    **CNSA 2.0 (NSA):** sistemas de segurança nacional até 2033.
+  </Step>
+  <Step>
+    **Híbridos:** segundo o NIST, a proibição de 2035 não se aplica a modos híbridos.
+  </Step>
+</Steps>
+
+## Assinaturas além dos reticulados
+
+O NIST abriu em 2022 uma chamada adicional para reduzir a dependência de reticulados e obter assinaturas curtas ou de verificação rápida: 50 submissões, 40 na primeira rodada, 14 na segunda. A terceira rodada (NIST IR 8610, mai/2026) tem candidatos multivariados (UOV, MAYO, SNOVA), MPC-in-the-head (FAEST, SDitH, MQOM) e isogenias (SQIsign).
+
+## Preço da segurança PQ em bytes
+
+| Item | Tamanho |
+|------|---------|
+| Ed25519 | 32 B de chave, 64 B de assinatura |
+| ML-DSA-44 | cerca de 39 vezes mais bytes transmitidos que o Ed25519 |
+| UOV | assinatura de 128 B e chave pública de 278 KB |
+| SQIsign | único próximo do clássico, com assinatura lenta |
+
+<Callout type="warn" title="Verifique antes de citar">
+  Prazos e status de documentos mudam. Datas devem ser conferidas no [NIST CSRC](https://csrc.nist.gov/) antes de citadas.
+</Callout>
+
+<Callout title="Aplicação no artigo" type="success">
+  Os prazos de 2030 e 2035 sustentam a motivação do trabalho: existe uma janela real para migrar. A exceção para modos híbridos reforça a escolha de medir justamente o híbrido.
+</Callout>

@@ -1,0 +1,51 @@
+---
+title: "O problema: blocos de tamanho fixo e padding"
+description: Como transformar uma mensagem de qualquer tamanho em blocos que o AES aceita
+---
+
+O AES cifra exatamente **16 bytes**. Uma mensagem real tem qualquer tamanho. Tudo o que vem depois nesta aula nasce dessa diferença.
+
+## O que o AES faz com um bloco
+
+Embaralha 16 bytes. Um bit diferente na entrada muda, em média, cerca de metade dos 128 bits da saída (no exemplo da aula, 74 dos 128). Mas a mensagem `Transferir R$ 500 para Ana.` tem **27 bytes**, e um arquivo de 1 MB tem **65.536 blocos**. Como cifrar isso?
+
+## O processo, em cinco passos
+
+<Steps>
+  <Step>
+    ### Converter a mensagem em bytes
+    Um caractere, um byte (tabela ASCII: `T = 54`, `r = 72`, espaço `= 20`, ponto `= 2e`). A mensagem de exemplo tem 27 bytes. Cada byte é escrito em hexadecimal, com dois dígitos de 4 bits cada.
+  </Step>
+  <Step>
+    ### Dividir em blocos de 16 bytes
+    27 bytes viram um bloco cheio e um bloco com **11 bytes**. O AES exige 16, então o último bloco precisa ser completado de um jeito que o receptor saiba desfazer.
+  </Step>
+  <Step>
+    ### Completar o último bloco (padding PKCS#7)
+    Faltam k bytes: acrescentam-se k bytes de valor k. No exemplo, faltam 5, então entram cinco bytes `05`. Se a mensagem já tem múltiplo de 16 bytes, acrescenta-se um **bloco inteiro** de bytes `10` (16), para que o último byte sempre indique o padding.
+  </Step>
+  <Step>
+    ### Processar cada bloco pelo modo de operação
+    A regra do modo diz como usar o AES em cada bloco e o que liga um bloco ao outro: ECB, CBC ou CTR.
+  </Step>
+  <Step>
+    ### Concatenar e enviar
+    No CBC, envia-se `IV ǁ C1 ǁ C2`: os 27 bytes de mensagem viram **48 bytes** enviados (5 de padding e 16 de IV).
+  </Step>
+</Steps>
+
+## O caminho de volta
+
+O receptor recebe 48 bytes, separa em blocos de 16, decifra cada bloco pela regra do modo, concatena, lê o **último byte** (`05`), confere que os 5 finais valem `05` e os remove. Sobram os 27 bytes originais.
+
+```
+Mensagem → Bytes → Blocos de 16 → Padding → Modo de operação → Concatenação → Texto cifrado
+ (partes mecânicas, iguais                    (a parte que decide a segurança)
+  para todos os modos)
+```
+
+O CTR dispensa o padding. As partes mecânicas são iguais em todos os modos, e **a regra do modo** é o que decide a segurança. A pergunta seguinte é: que propriedade essa regra precisa ter para que o texto cifrado não revele nada?
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. O padding é uma fonte clássica de falhas (oráculo de padding, ver página de ataques ao CBC), e sua ausência no CTR e no AEAD moderno é uma razão para o TLS 1.3 ter abandonado o CBC.
+</Callout>

@@ -1,0 +1,34 @@
+---
+title: E3, latência sob rede emulada
+description: O experimento mais arriscado, previsto para a semana 3
+---
+
+## Desenho
+
+Docker com `--cap-add=NET_ADMIN` e `tc netem`, variando:
+
+| Fator | Valores |
+|-------|---------|
+| RTT | 20 ms e 100 ms |
+| Perda de pacotes | 0%, 1% e 3% |
+| MTU | 1500 e 1280 |
+
+**Métricas:** tempo até o fim do handshake e número de segmentos TCP (capturados com `tcpdump`). O OpenSSL do container precisa ser da versão **3.5 ou superior**.
+
+## Por que perda e MTU
+
+A hipótese H3 diz que o híbrido não adiciona RTT enquanto o voo do servidor cabe na janela inicial de congestionamento (10 segmentos, [RFC 6928](https://www.rfc-editor.org/rfc/rfc6928)). Com **MTU de 1280**, o ClientHello de cerca de 1,4 KB passa a ocupar **dois segmentos**. Com **perda**, mais segmentos significam maior chance de perder algum e pagar uma retransmissão.
+
+## Aprender netem
+
+<Video id="jwAe8bP8Dp4" title="TC Explained: Linux Traffic Control, Queuing Disciplines (qdisc) and NetEm Emulation" meta="Novatron IT, 5 min, inglês" />
+
+## Riscos
+
+<Callout type="warn" title="É o mais arriscado">
+  Configurar rede emulada dá trabalho, principalmente no macOS (o Docker roda numa VM). Se a configuração travar, o **plano B** é um modelo analítico (RTT mais número de segmentos pela janela inicial), validado com poucas medições e com a limitação declarada. O estudo permanece válido.
+</Callout>
+
+<Cards>
+  <Card title="Riscos e plano B" href="/docs/artigo/riscos" />
+</Cards>

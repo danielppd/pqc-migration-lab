@@ -1,0 +1,39 @@
+---
+title: E2, tempo de CPU em loopback
+description: Plano do experimento da semana 2 e o principal cuidado de método
+---
+
+## Desenho
+
+| Elemento | Definição |
+|----------|-----------|
+| Variável independente | Grupo de troca de chaves |
+| Variável dependente | Tempo de handshake completo |
+| Linha de base | X25519 |
+| Condições | X25519, X25519MLKEM768, MLKEM768, SecP256r1MLKEM768 |
+
+## O cuidado de método que importa
+
+<Callout type="warn" title="Não meça repetindo openssl s_client num loop">
+  O custo de abrir um processo (alguns milissegundos) esconde diferenças de microssegundos, que é justamente a escala da diferença a ser medida. Além disso, o `openssl s_time` **não permite escolher o grupo** de troca de chaves.
+</Callout>
+
+É necessário um cliente que faça **muitos handshakes no mesmo processo** e cronometre cada um. A escolha e a justificativa dessa ferramenta é uma das decisões metodológicas da segunda semana. Um candidato é o `crypto/tls` do Go, que oferece X25519MLKEM768 (a confirmar na versão instalada).
+
+## Estatística
+
+<Steps>
+  <Step>Pelo menos **30 execuções** por condição.</Step>
+  <Step>**Ordem aleatorizada** das condições.</Step>
+  <Step>**Descartar aquecimento.**</Step>
+  <Step>Reportar **mediana e IC 95% por bootstrap**.</Step>
+</Steps>
+
+## Limitação a declarar
+
+No macOS não é possível fixar a frequência da CPU, desligar o turbo nem isolar um núcleo, como o checklist de rigor pede. A limitação é registrada nas ameaças à validade e, se possível, as medições finais são repetidas em Linux (VM ou nuvem).
+
+<Cards>
+  <Card title="Rigor experimental" href="/docs/aulas/aula-01-criptografia-moderna/rigor-experimental" />
+  <Card title="Hipótese H2" href="/docs/artigo/pergunta-e-hipoteses" />
+</Cards>

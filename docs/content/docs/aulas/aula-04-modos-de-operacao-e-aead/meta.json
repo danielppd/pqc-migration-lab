@@ -1,0 +1,1 @@
+{"title":"Aula 4 · Modos de operação e AEAD","pages":["index","---O problema---","blocos-e-padding","cpa-iv-e-nonce","---Modos de confidencialidade---","ecb","cbc","cbc-ataques","ctr","ctr-nonce-e-maleabilidade","---Cifração autenticada---","integridade-e-cca","aead","aes-gcm","gcm-nonce-repetido","chacha20-poly1305","na-pratica","---Fechamento---","exercicios","revisao"]}

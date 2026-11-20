@@ -1,0 +1,47 @@
+---
+title: Mapa de conceitos
+description: Temas que atravessam várias aulas e onde cada um aparece
+---
+
+Alguns conceitos reaparecem em aulas diferentes, com enfoques complementares. A tabela abaixo reúne os principais, para que um tema possa ser seguido de uma aula a outra. Novas aulas acrescentam linhas e links.
+
+## Segurança e modelo de ameaça
+
+| Conceito | Onde aparece |
+|----------|--------------|
+| Modelo de ameaça (capacidades, recursos, objetivo) | [Aula 2: modelo de ameaça](/docs/aulas/aula-02-criptografia-simetrica-1/fundamentos/modelo-de-ameaca), [Artigo: modelo de ameaças](/docs/artigo/modelo-de-ameacas) |
+| COA, KPA, CPA, CCA | [Aula 2: capacidades](/docs/aulas/aula-02-criptografia-simetrica-1/fundamentos/capacidades), [Aula 4: CPA, IV e nonce](/docs/aulas/aula-04-modos-de-operacao-e-aead/cpa-iv-e-nonce), [Aula 4: CCA](/docs/aulas/aula-04-modos-de-operacao-e-aead/integridade-e-cca) |
+| Princípio de Kerckhoffs | [Aula 2: Kerckhoffs](/docs/aulas/aula-02-criptografia-simetrica-1/fundamentos/kerckhoffs), [Aula 3: SubBytes](/docs/aulas/aula-03-cifras-de-bloco-des-aes/aes-subbytes) |
+| Segurança perfeita contra computacional | [Aula 2: ideia de Shannon](/docs/aulas/aula-02-criptografia-simetrica-1/perfeita/ideia-de-shannon), [Aula 3: do ideal ao operacional](/docs/aulas/aula-03-cifras-de-bloco-des-aes/do-ideal-ao-operacional) |
+| Redução e suposições | [Aula 2: função desprezível](/docs/aulas/aula-02-criptografia-simetrica-1/computacional/desprezivel), [Aula 1: garantias e suposições](/docs/aulas/aula-01-criptografia-moderna/garantias-e-suposicoes) |
+
+## Ataques recorrentes
+
+| Conceito | Onde aparece |
+|----------|--------------|
+| BEAST (IV previsível no CBC) | [Aula 2: capacidades](/docs/aulas/aula-02-criptografia-simetrica-1/fundamentos/capacidades), [Aula 4: ataques ao CBC](/docs/aulas/aula-04-modos-de-operacao-e-aead/cbc-ataques) |
+| Limite do aniversário e Sweet32 | [Aula 2: 3DES e Sweet32](/docs/aulas/aula-02-criptografia-simetrica-1/des/tres-des-e-sweet32), [Aula 3: comparação](/docs/aulas/aula-03-cifras-de-bloco-des-aes/comparacao) |
+| Reuso de chave ou de nonce | [Aula 2: limites do OTP](/docs/aulas/aula-02-criptografia-simetrica-1/perfeita/limites-do-otp), [Aula 4: CTR e nonce](/docs/aulas/aula-04-modos-de-operacao-e-aead/ctr-nonce-e-maleabilidade), [Aula 4: GCM com nonce repetido](/docs/aulas/aula-04-modos-de-operacao-e-aead/gcm-nonce-repetido) |
+| Maleabilidade (sigilo sem integridade) | [Aula 2: limites do OTP](/docs/aulas/aula-02-criptografia-simetrica-1/perfeita/limites-do-otp), [Aula 4: CTR](/docs/aulas/aula-04-modos-de-operacao-e-aead/ctr-nonce-e-maleabilidade), [Aula 4: AEAD](/docs/aulas/aula-04-modos-de-operacao-e-aead/aead) |
+| Canais laterais e implementação | [Aula 1: engenharia da migração](/docs/aulas/aula-01-criptografia-moderna/engenharia-da-migracao), [Aula 3: implementação do AES](/docs/aulas/aula-03-cifras-de-bloco-des-aes/aes-decifracao-e-implementacao) |
+
+## Projeto de cifras
+
+| Conceito | Onde aparece |
+|----------|--------------|
+| Feistel e função f não invertível | [Aula 2: Feistel](/docs/aulas/aula-02-criptografia-simetrica-1/des/feistel), [Aula 3: princípios de projeto](/docs/aulas/aula-03-cifras-de-bloco-des-aes/principios-de-projeto) |
+| Confusão e difusão | [Aula 2: função f](/docs/aulas/aula-02-criptografia-simetrica-1/des/funcao-f), [Aula 3: trilha larga](/docs/aulas/aula-03-cifras-de-bloco-des-aes/aes-trilha-larga) |
+| Margem de segurança (rodadas) | [Aula 3: trilha larga](/docs/aulas/aula-03-cifras-de-bloco-des-aes/aes-trilha-larga), [Aula 1: ciclo de vida (HAWK)](/docs/aulas/aula-01-criptografia-moderna/ciclo-de-vida) |
+| Parâmetros que envelhecem | [Aula 2: ataques ao DES](/docs/aulas/aula-02-criptografia-simetrica-1/des/ataques), [Aula 3: DES revisitado](/docs/aulas/aula-03-cifras-de-bloco-des-aes/des-justificativas) |
+| Corpos finitos | [Aula 3: GF(2^8)](/docs/aulas/aula-03-cifras-de-bloco-des-aes/aes-corpo-gf), [Aula 4: GHASH em GF(2^128)](/docs/aulas/aula-04-modos-de-operacao-e-aead/aes-gcm) |
+| Polinômio em ponto secreto (GHASH e Poly1305) | [Aula 4: AES-GCM](/docs/aulas/aula-04-modos-de-operacao-e-aead/aes-gcm), [Aula 4: ChaCha20-Poly1305](/docs/aulas/aula-04-modos-de-operacao-e-aead/chacha20-poly1305) |
+
+## Migração
+
+| Conceito | Onde aparece |
+|----------|--------------|
+| Migração por compatibilidade (k1 = k2 = k3 vira DES; híbrido mantém o clássico) | [Aula 2: 3DES](/docs/aulas/aula-02-criptografia-simetrica-1/des/tres-des-e-sweet32), [Aula 1: KEM e híbrido](/docs/aulas/aula-01-criptografia-moderna/kem-e-hibrido) |
+| Migração por remoção (CBC e RC4 fora do TLS 1.3) | [Aula 4: CBC](/docs/aulas/aula-04-modos-de-operacao-e-aead/cbc), [Aula 4: na prática](/docs/aulas/aula-04-modos-de-operacao-e-aead/na-pratica) |
+| Processo público de seleção (AES, NIST PQC) | [Aula 3: concurso AES](/docs/aulas/aula-03-cifras-de-bloco-des-aes/concurso-aes), [Aula 1: padrões e prazos](/docs/aulas/aula-01-criptografia-moderna/padroes-e-prazos) |
+| Coletar agora, decifrar depois (HNDL) e Mosca | [Aula 1: ameaça quântica](/docs/aulas/aula-01-criptografia-moderna/ameaca-quantica) |
+| Rigor experimental | [Aula 1: rigor experimental](/docs/aulas/aula-01-criptografia-moderna/rigor-experimental), [Artigo: E2](/docs/artigo/e2-cpu) |

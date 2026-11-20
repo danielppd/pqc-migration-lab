@@ -1,0 +1,49 @@
+---
+title: "Aula 3, cifras de bloco: DES e AES"
+description: Da segurança perfeita à segurança operacional, do DES ao AES
+---
+
+**Tema:** como projetar uma cifra de bloco que ceda segurança perfeita em troca de eficiência de forma controlada, e como o DES e o AES fazem essa troca.
+
+**Pergunta central:** se o One-Time Pad é perfeito, por que o mundo inteiro cifra com o AES?
+
+## Objetivos
+
+1. Explicar o que se perde e o que se ganha ao trocar segurança perfeita por segurança computacional.
+2. Descrever o DES em cada componente e justificar cada escolha de projeto.
+3. Descrever o AES em cada componente, incluindo a aritmética em GF(2^8).
+4. Comparar redes de Feistel e redes de substituição e permutação.
+5. Relacionar tamanho de bloco, tamanho de chave e número de rodadas a ataques concretos.
+6. Avaliar o custo de implementação de cada componente em hardware e em software.
+
+## Percurso
+
+<Steps>
+  <Step>
+    ### Do ideal ao operacional
+    O que uma cifra real precisa entregar, a permutação pseudoaleatória como objeto-alvo e as quatro alavancas de projeto.
+  </Step>
+  <Step>
+    ### Princípios de projeto
+    Confusão e difusão, cifras produto, Feistel contra SPN e o papel da não linearidade.
+  </Step>
+  <Step>
+    ### DES revisitado
+    Por que o DES tem 64 bits de bloco, 56 de chave e 16 rodadas, e como a história do concurso AES responde a cada limite.
+  </Step>
+  <Step>
+    ### AES
+    Estado, corpo finito GF(2^8), as quatro camadas, a trilha larga, a expansão de chave, um exemplo completo e a implementação.
+  </Step>
+  <Step>
+    ### Fechamento
+    Comparação direta entre DES, 3DES e AES, e exercícios resolvidos.
+  </Step>
+</Steps>
+
+**Leitura de apoio da aula:** Katz e Lindell, *Introduction to Modern Cryptography* (3ª ed.), capítulo 7; Daemen e Rijmen, *The Design of Rijndael* (2ª ed., 2020); [FIPS 197 (AES)](https://csrc.nist.gov/pubs/fips/197/final) e FIPS 46-3 (DES).
+
+<Cards>
+  <Card title="Primeira página" href="/docs/aulas/aula-03-cifras-de-bloco-des-aes/do-ideal-ao-operacional" />
+  <Card title="Direto ao AES" href="/docs/aulas/aula-03-cifras-de-bloco-des-aes/aes-estado-e-camadas" />
+</Cards>

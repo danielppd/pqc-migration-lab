@@ -1,0 +1,39 @@
+---
+title: Ataques ao DES e o modelo de ameaça
+description: Por que a chave curta cedeu primeiro
+---
+
+| Ataque | Capacidade exigida | Custo | Situação |
+|--------|--------------------|-------|----------|
+| Busca exaustiva | KPA com 1 ou 2 pares (m, c) | `2^56` no pior caso, `2^55` em média, metade disso com complementação e CPA | Executado em 1998 (56 h) e 1999 (22 h 15 min) |
+| Criptoanálise diferencial (Biham e Shamir, 1990) | CPA: textos claros escolhidos | `2^47` textos | Teórico: volume de dados impraticável |
+| Criptoanálise linear (Matsui, 1993) | KPA: textos claros conhecidos | `2^43` textos | Executado em 1994: 12 estações, cerca de 50 dias |
+
+## O que a tabela ensina
+
+O **modelo de ameaça decide qual ataque importa**. Os ataques analíticos exigem capacidades e volumes de dados que um adversário real raramente tem. A força bruta exige só um par conhecido. **A chave curta foi o ponto que cedeu.**
+
+## Força bruta na prática
+
+<Steps>
+  <Step>**1977:** DES padronizado com chave de 56 bits.</Step>
+  <Step>**1998:** Deep Crack (EFF), cerca de US$ 250 mil, recupera uma chave em 56 horas.</Step>
+  <Step>**1999:** Deep Crack e distributed.net levam 22 h 15 min.</Step>
+  <Step>**2001:** AES publicado (FIPS 197), com chaves de 128, 192 e 256 bits.</Step>
+  <Step>**Hoje:** `2^56` testes levam menos de um milissegundo na escala da rede Bitcoin.</Step>
+</Steps>
+
+Escolher parâmetros é apostar contra o futuro. Por isso 128 bits é o mínimo atual e 256 bits é exigido em contextos de longo prazo.
+
+## O que o DES ensina sobre criptografia moderna
+
+| Lição | Significado |
+|-------|-------------|
+| Escrutínio público | Quase cinco décadas de análise aberta não produziram atalho prático contra as 16 rodadas (Kerckhoffs funcionando) |
+| Parâmetros envelhecem | Chave de 56 bits e bloco de 64 bits foram o que cedeu |
+| Modelo de ameaça | Diferencial exige CPA, linear exige KPA, força bruta exige um par. A capacidade do adversário decide o ataque relevante |
+| Legado de projeto | Feistel, critérios de S-box, avalanche e margem de rodadas viraram vocabulário padrão |
+
+<Callout title="Aplicação no artigo" type="success">
+  "Parâmetros envelhecem" é a tese por trás de toda migração, inclusive a pós-quântica. RSA e ECC não têm defeito de estrutura contra computadores clássicos: tornam-se obsoletos porque o modelo de recursos do adversário muda.
+</Callout>

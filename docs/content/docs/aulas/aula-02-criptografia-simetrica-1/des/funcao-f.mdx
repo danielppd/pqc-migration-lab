@@ -1,0 +1,47 @@
+---
+title: A função f e as S-boxes
+description: Expansão, mistura com a chave, substituição e permutação
+---
+
+## O caminho dos dados em f
+
+```
+R (32) → [E: expansão] → 48 → XOR com Ki (48) → [S1..S8] → 32 → [P: permutação] → f(R, K)
+```
+
+| Etapa | O que faz |
+|-------|-----------|
+| **Expansão E** | 32 para 48 bits. Cada bit de borda de um grupo de 4 aparece duas vezes |
+| **XOR com a subchave** | O **único ponto em que a chave entra** |
+| **8 S-boxes** | Cada uma de 6 para 4 bits. O **único passo não linear** |
+| **Permutação P** | Reordena os 32 bits, espalhando a saída de cada S-box para várias S-boxes da rodada seguinte |
+
+E e P produzem **difusão**, as S-boxes produzem **confusão** (termos de Shannon, 1949).
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/2/25/Data_Encription_Standard_Flow_Diagram.svg"
+  alt="Fluxo completo do algoritmo DES"
+  caption="Fluxo do DES: permutação inicial, 16 rodadas com subchaves e permutação final."
+  credit="Hellisp, Wikimedia Commons, CC0"
+  href="https://commons.wikimedia.org/wiki/File:Data_Encription_Standard_Flow_Diagram.svg"
+/>
+
+## Como ler uma S-box
+
+Os bits externos (1º e 6º) escolhem a **linha**, os 4 do meio escolhem a **coluna**.
+
+Exemplo do slide: entrada `011011`. Bits externos `01` dão a linha 1, bits internos `1101` dão a coluna 13. Em S1, linha 1, coluna 13, o valor é 5, ou seja `0101`.
+
+<Callout title="Nota de estudo">
+  As tabelas de S-box não precisam ser memorizadas. O esperado é saber **ler** uma (exercício 7 da Aula 2) e explicar por que elas existem.
+</Callout>
+
+## Por que as S-boxes existem
+
+Sem elas, E, P, IP e o XOR com a chave são todos **lineares** sobre bits. O DES inteiro seria um sistema linear, e poucos pares (m, c) bastariam para obter a chave por eliminação gaussiana.
+
+Critérios de projeto das S-boxes: cada linha é uma permutação de 0 a 15, nenhum bit de saída é próximo de função linear das entradas, mudar 1 bit de entrada muda pelo menos 2 de saída, e resistência à criptoanálise diferencial. Toda a segurança do DES contra ataques analíticos se apoia nas 8 S-boxes (32 tabelas de 16 valores).
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. Lição de método: separar o que é estrutura de segurança do que é conveniência de implementação. A permutação inicial IP, por exemplo, não protege nada, só organiza bits para o hardware dos anos 1970. Na pesquisa, a mesma separação vale entre custo criptográfico e custo de formato de protocolo.
+</Callout>

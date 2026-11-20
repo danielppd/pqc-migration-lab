@@ -1,0 +1,40 @@
+---
+title: Primitivas clássicas em uma página
+description: AEAD, hash, MAC, KDF, assimétrica e assinaturas
+---
+
+Os blocos que sustentam a Internet e que continuam presentes, combinados, na era pós-quântica.
+
+<Accordions type="single">
+  <Accordion title="Simétrica e AEAD">
+    AES (FIPS 197) domina, com suporte em hardware (AES-NI, ARMv8). ChaCha20 é a alternativa rápida em software. **AEAD** cifra e autentica numa única operação: AES-GCM e ChaCha20-Poly1305 são o padrão do TLS 1.3. Ascon, vencedor da competição NIST para dispositivos restritos, foi publicado como SP 800-232 (2025). Falhas reais vêm do uso: **reutilizar nonce no GCM** revela a chave de autenticação.
+  </Accordion>
+  <Accordion title="Hash, MAC e KDF">
+    SHA-2 e SHA-3 (SHAKE como XOF), BLAKE3. Propriedades: resistência a pré-imagem, segunda pré-imagem e colisão. **HMAC** autentica com chave simétrica. **HKDF** transforma segredos de troca de chaves em chaves de sessão, e é **onde o segredo clássico e o pós-quântico se combinam**. Árvores de Merkle comprometem um conjunto com um único hash e a prova de inclusão tem `log2 N` elementos.
+  </Accordion>
+  <Accordion title="Assimétrica clássica">
+    Chave pública para quem envia ou verifica, chave privada para quem decifra ou assina. **RSA** liga-se à fatoração (chaves grandes, operações privadas lentas). **Curvas elípticas** dão o mesmo nível com chaves de 32 bytes: X25519 (troca de chaves) e Ed25519 (assinatura) são o padrão de fato. Diffie-Hellman permite acordo de chave não interativo, e **não existe análogo pós-quântico igualmente eficiente**, por isso a migração usa KEMs.
+  </Accordion>
+  <Accordion title="Assinaturas digitais">
+    `KeyGen() -> (pk, sk)`, `Sign(sk, m) -> sigma`, `Vrfy(pk, m, sigma) -> 0 ou 1`. Segurança EUF-CMA. Aparecem em certificados TLS, assinatura de código, firmware, documentos com validade jurídica (ICP-Brasil), passaportes e blockchains.
+  </Accordion>
+</Accordions>
+
+## Equivalência de segurança clássica
+
+| Bits de segurança | RSA / DH | Curva elíptica |
+|-------------------|----------|----------------|
+| 112 | 2048 | 224 |
+| 128 | 3072 | 256 |
+| 192 | 7680 | 384 |
+| 256 | 15360 | 512 |
+
+Contra um adversário quântico, **todas as linhas colapsam**: Shor resolve fatoração e log discreto em tempo polinomial.
+
+## O elemento transversal
+
+O hash está em SLH-DSA, na transformação Fujisaki-Okamoto do ML-KEM, nas provas de conhecimento zero transparentes e na nova arquitetura de certificados da Web.
+
+<Callout title="Aplicação no artigo" type="success">
+  Três peças aparecem no handshake estudado: **X25519** (clássica), **HKDF** (que combina os segredos) e **ECDSA P-256** (assinatura do certificado, mantida clássica no escopo). Distinguir cada uma evita atribuir à troca de chaves custos que pertencem à autenticação.
+</Callout>

@@ -1,0 +1,38 @@
+---
+title: Exercícios resolvidos
+description: Os nove exercícios da Aula 2, com resolução
+---
+
+<Callout title="Formato">
+  Cada resolução está recolhida num acordeão, para que o exercício possa ser resolvido antes da conferência.
+</Callout>
+
+<Accordions>
+  <Accordion title="1. Adição modular com chave curta">
+    `Enc_k(m) = (m + k) mod 256`: `Pr[Enc_K(m) = c] = Pr[K = c - m mod 256] = 1/256`, perfeito para 1 byte. Com 2 bytes e o mesmo k, `c1 - c2 = m1 - m2 (mod 256)` **vaza a diferença**. O adversário escolhe `m0 = (0,0)` e `m1 = (0,1)`: a diferença dos ciphertexts é 0 em m0 e -1 em m1, e vence com probabilidade 1.
+  </Accordion>
+  <Accordion title="2. OTP sem a chave zero">
+    **Não é perfeito.** Há `2^n - 1` chaves para `2^n` mensagens, o que viola Shannon (`|K| < |M|`). Concretamente, `Pr[Enc_K(m) = m] = 0`, mas `Pr[Enc_K(m) = c] = 1/(2^n - 1)` para c diferente de m. Ao ver `c = m0`, o adversário sabe que b = 1.
+  </Accordion>
+  <Accordion title="3. Reuso de chave">
+    `c1 XOR c2 = 13 11 02 16 00 00`. XOR com "ATACAR" (`41 54 41 43 41 52`) dá `52 45 43 55 41 52`, que é **"RECUAR"**. Conferido por script.
+  </Accordion>
+  <Accordion title="4. Desprezível ou não">
+    a) sim; b) não; c) sim; d) **não** (`2^(log n) = n`, então é `1/n`); e) sim.
+  </Accordion>
+  <Accordion title="5. Ordem de grandeza">
+    100 bits: `2^100 = (2^10)^10`, cerca de `10^30`, dividido por `10^21` dá `10^9` s, cerca de 32 anos pela aproximação (cerca de 40 anos exato). 112 bits: multiplique por `2^12`, cerca de `4 * 10^12` s, cerca de 130 mil anos pela aproximação (165 mil exato, como no slide).
+  </Accordion>
+  <Accordion title="6. Avaliando uma alegação">
+    Perguntas a fazer: o algoritmo é público e auditado, ou "proprietário"? (Kerckhoffs). Qual a definição de segurança e o modelo de ameaça? Há prova, e sob qual suposição? Chave de 4096 bits é irrelevante se a estrutura for fraca. Teste estatístico só detecta defeito, não prova segurança. Como tratam nonce, reuso de chave e integridade?
+  </Accordion>
+  <Accordion title="7. Lendo S-boxes">
+    (a) S1 com `011011` dá 5, ou `0101` (linha 1, coluna 13). (b) e (c): aplica-se o mesmo método às tabelas de S3 e S5 do slide 78 (bits externos escolhem a linha, os 4 do meio a coluna).
+  </Accordion>
+  <Accordion title="8. Complementação e busca exaustiva">
+    Peça `Enc(m) = c` e `Enc(complemento de m) = c'`. Para testar uma chave candidata k, calcule `DES_k(m)`: se for c, a chave é k; se for o complemento de c', a chave é o complemento de k. **Um cálculo testa duas chaves**, logo `2^55`.
+  </Accordion>
+  <Accordion title="9. Dupla cifração">
+    Encontro no meio: tempo cerca de `2^57` (`2^56` de ida mais `2^56` de volta), memória `2^56` entradas, contra `2^112` esperado. Com 3 chaves o ataque custa cerca de `2^112`, e é por isso que o 3DES usa três aplicações e não duas.
+  </Accordion>
+</Accordions>

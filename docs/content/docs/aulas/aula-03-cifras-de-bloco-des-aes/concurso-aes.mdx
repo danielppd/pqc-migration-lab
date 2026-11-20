@@ -1,0 +1,53 @@
+---
+title: O concurso AES
+description: O processo público que escolheu o sucessor do DES
+---
+
+O DES foi remendado por um tempo (2DES, 3DES, ver [Aula 2](/docs/aulas/aula-02-criptografia-simetrica-1/des/tres-des-e-sweet32)). A solução definitiva foi um **concurso público**.
+
+## Cronologia (1997 a 2001)
+
+<Steps>
+  <Step>**1997:** o NIST anuncia o concurso público e publica os requisitos.</Step>
+  <Step>**1998:** 15 candidatos aceitos, de 12 países.</Step>
+  <Step>**1999:** 5 finalistas: MARS, RC6, Rijndael, Serpent e Twofish.</Step>
+  <Step>**2000:** o Rijndael (Daemen e Rijmen) é selecionado.</Step>
+  <Step>**2001:** o FIPS 197 publica o AES. **2023:** atualização editorial do FIPS 197.</Step>
+</Steps>
+
+**Diferença em relação ao DES:** processo aberto e internacional, critérios públicos e anos de análise por terceiros antes da escolha.
+
+## Requisitos
+
+| Requisito | Resposta a |
+|-----------|-----------|
+| Bloco de 128 bits | O limite do aniversário do bloco de 64 bits |
+| Chaves de 128, 192 e 256 bits | A busca exaustiva, com folga para décadas |
+| Eficiência ampla | Rápido em software de 8, 32 e 64 bits e em hardware |
+| Público e livre | Algoritmo aberto e sem royalties |
+
+**Critérios de avaliação do NIST, nesta ordem:**
+
+1. **Segurança:** resistência à criptoanálise, base matemática, aleatoriedade da saída.
+2. **Custo:** desempenho, memória e área em várias plataformas, incluindo cartões inteligentes.
+3. **Características do algoritmo:** flexibilidade, simplicidade, facilidade de implementação segura.
+
+## Os finalistas e o critério de equilíbrio
+
+| Finalista | Estrutura | Destaque | Ponto fraco relativo |
+|-----------|-----------|----------|----------------------|
+| MARS (IBM) | Feistel heterogêneo | Projeto conservador | Complexo de analisar e implementar |
+| RC6 (RSA Labs) | Feistel com multiplicações | Muito rápido em processadores de 32 bits | Multiplicações caras em cartões e hardware |
+| **Rijndael** | SPN orientada a bytes | Rápido e compacto em todas as plataformas | Margem menor que a do Serpent |
+| Serpent | SPN com 32 rodadas | Maior margem de segurança | Mais lento em software |
+| Twofish | Feistel, S-boxes dependentes da chave | Flexível e rápido | Estrutura mais difícil de analisar |
+
+<Callout title="O critério foi o equilíbrio">
+  O Rijndael não venceu por ser o mais seguro nem o mais rápido em uma plataforma. Venceu por ser bom em tudo ao mesmo tempo.
+</Callout>
+
+Para contexto adicional: [Advanced Encryption Standard (Wikipedia)](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) e o texto oficial do [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final).
+
+<Callout title="Aplicação no artigo" type="success">
+  O concurso AES é o modelo de processo que o NIST repetiu para a criptografia pós-quântica (chamada pública, análise aberta, rodadas de seleção). Compreender o **critério de equilíbrio** ajuda a entender por que o ML-KEM foi escolhido e por que o HQC foi mantido como reserva.
+</Callout>

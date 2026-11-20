@@ -1,0 +1,58 @@
+---
+title: "A aritmética do AES: o corpo GF(2^8)"
+description: Bytes como polinômios, soma como XOR e o xtime
+---
+
+O AES trata cada byte como um elemento de um **corpo finito** com 256 elementos, GF(2^8). É isso que permite definir a S-box e o MixColumns com propriedades demonstráveis.
+
+## Bytes como polinômios
+
+Cada bit do byte é o coeficiente de uma potência de x:
+
+```
+57 = 0101 0111 = x^6 + x^4 + x^2 + x + 1
+```
+
+- **Soma:** XOR bit a bit. `57 XOR 83 = d4`.
+- **Produto:** multiplicam-se os polinômios e reduz-se módulo `m(x) = x^8 + x^4 + x^3 + x + 1` (em hexadecimal, `0x11B`).
+
+## Por que isso é eficiente
+
+A soma é um XOR. Multiplicar por x (o byte `02`) é deslocar um bit para a esquerda e, se saiu um 1 pela esquerda, fazer XOR com `1b`. Essa operação se chama **xtime**. Qualquer produto vira uma sequência de `xtime` e XOR, sem tabelas grandes.
+
+## Por que um corpo
+
+O polinômio `m(x)` é **irredutível**: todo byte não nulo tem inverso. A S-box precisa do inverso, e o MixColumns precisa ser invertível.
+
+## Exemplo: {57} · {83}
+
+O multiplicador `83` é decomposto em potências de `02`: `83 = 80 XOR 02 XOR 01`. A tabela abaixo é construída aplicando `xtime` a cada linha.
+
+| Potência | {57} · potência |
+|----------|-----------------|
+| 01 | 57 |
+| 02 | ae |
+| 04 | 47 |
+| 08 | 8e |
+| 10 | 07 |
+| 20 | 0e |
+| 40 | 1c |
+| 80 | 38 |
+
+Somando os produtos parciais: `{57}·{80} XOR {57}·{02} XOR {57}·{01} = 38 XOR ae XOR 57 = c1`.
+
+Exemplo de redução: `ae` deslocado vira `15c`; como saiu um bit, aplica-se XOR com `11b` e o resultado é `47`.
+
+<Callout title="Verificação independente" type="info">
+  O produto `{57} · {13} = {fe}` e o `{57} · {83} = {c1}` foram conferidos por um script pequeno de multiplicação em GF(2^8). A matemática do corpo é determinística: qualquer implementação correta chega aos mesmos valores.
+</Callout>
+
+## Vídeos complementares
+
+<Video id="LRNKxUkXsPw" title="GF(2^8) and AES Explanation" meta="Cristian G Duque Gonzalez, 14 min, inglês" />
+
+<Video id="M8wriZnyto4" title="Multiplication in GF(2^8)" meta="Timothy Koerner, 8 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento matemático do AES, sem aplicação direta na pesquisa. A noção de **corpo finito** volta, em outra forma, no GHASH do AES-GCM (Aula 4), que opera em GF(2^128).
+</Callout>

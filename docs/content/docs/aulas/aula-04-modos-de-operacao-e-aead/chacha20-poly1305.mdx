@@ -1,0 +1,94 @@
+---
+title: ChaCha20-Poly1305
+description: Uma cifra de fluxo feita só de somas, rotações e XOR, com um autenticador polinomial de uso único
+---
+
+## Por que existe uma alternativa ao AES-GCM
+
+| Problema | Resposta: ARX |
+|----------|---------------|
+| Sem AES-NI, o AES rápido usa tabelas que vazam por cache, e o AES em tempo constante é lento. Vale também para o GHASH | Só soma módulo `2^32`, rotação e XOR. **Tempo constante em qualquer processador, sem tabelas** |
+
+Adotado no Chrome para Android (2014), na [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439) (2018, que atualizou a RFC 7539 de 2015), no TLS 1.3, no WireGuard e no OpenSSH. Mesmo papel do AES-GCM, outra escolha de equilíbrio: desempenho e segurança de implementação em qualquer hardware, sem depender de instruções especiais.
+
+## O estado do ChaCha20
+
+16 palavras de 32 bits, em little-endian:
+
+```
+constantes   "expa" "nd 3" "2-by" "te k"      linha 0
+chave        256 bits (8 palavras)            linhas 1 e 2
+contador     32 bits + nonce 96 bits          linha 3
+```
+
+- **As constantes** impedem estados simétricos (tudo zero, por exemplo) e separam este uso de qualquer outro.
+- **O contador:** cada bloco de 64 bytes de fluxo usa um contador diferente, como no CTR.
+- **Little-endian:** o primeiro byte é o menos significativo. `00 01 02 03` vira a palavra `03020100`. Ler na ordem errada é o erro mais comum em implementações feitas à mão.
+
+## A operação central: o quarto de rodada
+
+```
+a += b; d ^= a; d <<<= 16
+c += d; b ^= c; b <<<= 12
+a += b; d ^= a; d <<<= 8
+c += d; b ^= c; b <<<= 7
+```
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/9/99/ChaCha_Cipher_Quarter_Round_Function.svg"
+  alt="Diagrama do quarto de rodada do ChaCha"
+  caption="O quarto de rodada do ChaCha: quatro palavras combinadas por soma, XOR e rotação."
+  credit="Tony Arcieri, Wikimedia Commons, CC BY-SA 4.0"
+  href="https://commons.wikimedia.org/wiki/File:ChaCha_Cipher_Quarter_Round_Function.svg"
+/>
+
+Teste da RFC 8439, seção 2.1.1: com entrada `a = 11111111`, `b = 01020304`, `c = 9b8d6f43`, `d = 01234567`, a saída é `ea2a92f4 cb1cf8ce 4581472e 5881c4bb`. (Reproduzido com uma implementação independente de poucas linhas.)
+
+**Por que ARX:** a soma é a parte não linear (o vai-um mistura bits). XOR e rotação espalham. Nada depende de tabela.
+
+**Rodadas de coluna e de diagonal:** aplica-se o quarto de rodada às 4 colunas, depois às 4 diagonais. São 10 rodadas duplas, ou **20 rodadas**.
+
+<Video id="UeIpq-C-GSA" title="ChaCha Cipher" meta="Computerphile, 14 min, inglês" />
+
+## Poly1305: um autenticador de uso único
+
+```
+r = clamp(chave[0..15]),  s = chave[16..31]
+Para cada bloco mi de 16 bytes:
+    acc = (acc + mi + 2^128) · r  mod (2^130 - 5)
+tag = (acc + s) mod 2^128
+```
+
+| Escolha | Motivo |
+|---------|--------|
+| Módulo `2^130 - 5` | É primo, e `2^130 ≡ 5`: a redução vira uma multiplicação por 5 e uma soma |
+| Byte extra `01` em cada bloco | Sem ele, as mensagens `abc` e `abc` seguido de zeros teriam a mesma etiqueta |
+| Mesmo desenho do GHASH | Polinômio nos blocos, avaliado em `r` secreto, mascarado por `s` |
+| **Uso único** | Com duas etiquetas sob o mesmo `(r, s)`, o atacante resolve `r` e falsifica |
+
+O vetor de teste da RFC 8439 (seção 2.5.2) produz a etiqueta `a8061dc1305136c6c22b8baf0c0127a9`.
+
+## A construção AEAD (RFC 8439)
+
+<Steps>
+  <Step>**Chave do Poly1305** `(r, s)`: derivada do **bloco 0** do ChaCha20 com o nonce. Cada mensagem tem a sua.</Step>
+  <Step>**Cifrar:** `P` XOR o fluxo do ChaCha20, a partir do bloco 1, dando `C`.</Step>
+  <Step>**Autenticar depois de cifrar:** o Poly1305 cobre `A ǁ 0s ǁ C ǁ 0s ǁ |A| ǁ |C|`, ou seja, o **texto cifrado** (a composição segura).</Step>
+  <Step>**Comprimentos no fim** impedem mover bytes entre `A` e `C` sem mudar a etiqueta.</Step>
+</Steps>
+
+## AES-GCM e ChaCha20-Poly1305 lado a lado
+
+| | AES-GCM | ChaCha20-Poly1305 |
+|---|---------|-------------------|
+| Sigilo | AES em modo CTR | Cifra de fluxo ChaCha20 |
+| Autenticação | GHASH em GF(2^128) | Poly1305 módulo `2^130 - 5` |
+| Chave / nonce / etiqueta | 128 ou 256 / 96 / 128 bits | 256 / 96 / 128 bits |
+| Com instruções dedicadas | Mais rápido | Rápido |
+| Sem instruções dedicadas | Lento ou vulnerável a cache | Rápido e em tempo constante |
+| Nonce repetido | Vaza XOR das mensagens e `H`: falsificação | Vaza XOR das mensagens e `(r, s)`: falsificação |
+| Padrões | NIST SP 800-38D, TLS 1.3 | RFC 8439, TLS 1.3, WireGuard |
+
+<Callout title="Aplicação no artigo" type="success">
+  É o segundo AEAD do TLS 1.3 (`TLS_CHACHA20_POLY1305_SHA256`). Mostra uma escolha de equilíbrio entre desempenho e segurança de implementação, o mesmo tipo de decisão que define os grupos de troca de chaves híbridos comparados na pesquisa.
+</Callout>

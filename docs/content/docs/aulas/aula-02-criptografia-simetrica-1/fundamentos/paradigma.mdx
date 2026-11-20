@@ -1,0 +1,49 @@
+---
+title: O paradigma da chave secreta
+description: Alice, Bob, Eve e a tripla (Gen, Enc, Dec)
+---
+
+Duas pessoas compartilham um segredo e querem conversar por um canal que um adversário observa. Esse é o cenário inteiro da criptografia simétrica.
+
+## O desenho de referência
+
+```
+            chave k (combinada ANTES, por um canal seguro)
+   Alice ─────────────────────────────────────────── Bob
+     │                                                 │
+     │  c = Enc_k(m)  ───────── canal público ───────► │  m = Dec_k(c)
+     │                              │                  │
+     │                            Eve vê c,             │
+     │                            NÃO tem k             │
+```
+
+## Os três algoritmos
+
+| Algoritmo | O que faz | Detalhe importante |
+|-----------|-----------|--------------------|
+| `Gen` | Gera a chave k | Probabilístico, normalmente **uniforme** |
+| `Enc(k, m)` | Devolve o ciphertext c | Pode usar aleatoriedade própria |
+| `Dec(k, c)` | Devolve a mensagem m | Determinístico |
+
+**Correção:** `Dec_k(Enc_k(m)) = m` para toda chave e toda mensagem. É uma exigência **funcional**: o destinatário legítimo recupera a mensagem. Não diz nada sobre o adversário (a cifra "identidade", `Enc(m) = m`, é correta e inútil).
+
+## Decifrar é desfazer na ordem inversa
+
+Se cifrar é "calçar a meia e depois o sapato", decifrar é "tirar o sapato e depois a meia". Se cifrar aplica os blocos 1, 2, 3, decifrar desfaz 3, 2, 1.
+
+## Por que a chave é uniforme
+
+Qualquer viés (alguns valores mais prováveis que outros) dá ao atacante uma chance maior de chutar certo. Chave uniforme é o melhor caso.
+
+<Video id="vsXMMT2CqqE" title="Key Exchange Problems" meta="Computerphile, 9 min, inglês" />
+
+O vídeo mostra o problema que fica **fora** deste paradigma: como combinar a chave antes. Veremos que isso é o que a criptografia de chave pública e os KEMs resolvem.
+
+## O que a chave compartilhada não resolve
+
+- **Distribuição:** com n usuários conversando dois a dois são `n(n-1)/2` chaves (1000 usuários, 499.500 chaves).
+- **Integridade:** confidencialidade sozinha não impede que alguém altere o ciphertext.
+
+<Callout title="Aplicação no artigo" type="success">
+  Na prática, a chave pública combina a chave e a simétrica protege os dados, como no TLS 1.3. A etapa de combinar a chave é a que a pesquisa mede.
+</Callout>

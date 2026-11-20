@@ -1,0 +1,79 @@
+---
+title: CBC, encadeamento de blocos
+description: Cada bloco é misturado ao bloco cifrado anterior antes de entrar na cifra
+---
+
+**Cipher Block Chaining.** Cada bloco de texto claro é combinado, por XOR, com o bloco cifrado anterior antes de entrar na cifra.
+
+## Antes do CBC: a operação XOR
+
+| a | b | a XOR b |
+|---|---|---------|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
+
+Três propriedades: `a XOR 0 = a`, `a XOR a = 0` e `(P XOR M) XOR M = P`. A mesma máscara cifra e decifra. Entre blocos de 16 bytes, o XOR é feito byte a byte, cada byte com o da mesma posição. Exemplo: `53 XOR 2b = 78`.
+
+## As fórmulas
+
+```
+Cifração:      C0 = IV         Ci = EK(Pi XOR C(i-1))
+Decifração:    Pi = DK(Ci) XOR C(i-1)
+```
+
+O bloco anterior funciona como **máscara**: blocos iguais entram na cifra com máscaras diferentes. Envia-se `IV, C1, ..., Cn`, com o IV em claro. Na decifração, todos os `Ci` já estão disponíveis, então os blocos decifram **ao mesmo tempo**.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/8/80/CBC_encryption.svg"
+  alt="Diagrama do modo CBC na cifração"
+  caption="CBC, cifração: cada bloco de texto claro é combinado por XOR com o ciphertext anterior (ou com o IV, no primeiro bloco) antes de cifrar."
+  credit="WhiteTimberwolf, Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:CBC_encryption.svg"
+/>
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/2/2a/CBC_decryption.svg"
+  alt="Diagrama do modo CBC na decifração"
+  caption="CBC, decifração: Pi = DK(Ci) XOR C(i-1). A dependência por um XOR simples é de onde saem os ataques ativos."
+  credit="WhiteTimberwolf, Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:CBC_decryption.svg"
+/>
+
+## Exemplo com vetor de teste do NIST
+
+Vetor do [SP 800-38A](https://csrc.nist.gov/pubs/sp/800/38/a/final), F.2.1, com a chave `2b7e1516 28aed2a6 abf71588 09cf4f3c`:
+
+| Etapa | Valor |
+|-------|-------|
+| `P1` | `6bc1bee2 2e409f96 e93d7e11 7393172a` |
+| IV | `00010203 04050607 08090a0b 0c0d0e0f` |
+| Entrada do AES: `P1 XOR IV` | `6bc0bce1 2a459991 e134741a 7f9e1925` |
+| `C1 = EK(entrada)` | `7649abac 8119b246 cee98e9b 12e9197d` |
+
+Conferência à mão do primeiro byte da entrada: `6b XOR 00 = 6b`. O segundo: `c1 XOR 01 = c0`.
+
+**Mensagem de exemplo da aula:** `Transferir R$ 500 para Ana.` (27 bytes) com padding de 5 bytes dá 2 blocos, e o envio é `IV ǁ C1 ǁ C2` com **48 bytes**. O receptor não consegue decifrar o primeiro bloco sem o IV (`P1 = DK(C1) XOR IV`).
+
+## Propriedades
+
+| Propriedade | CBC |
+|-------------|-----|
+| Cifração | Sequencial |
+| Decifração | Paralela |
+| Padding | Necessário |
+| Usa a decifração do AES | Sim |
+| 1 bit errado em `Ci` | `Pi` inteiro destruído, e o mesmo bit invertido em `P(i+1)` |
+
+Na imagem da aula, 1 bit alterado em 60 blocos cifrados destrói 60 blocos de 16 bytes, cerca de 5 pixels cada.
+
+## IV fixo: prefixos iguais ficam visíveis
+
+Cifrando duas mensagens que começam igual (`Prezados alunos, a prova sera na...` e `Prezados alunos, a nota final sa...`) **com o mesmo IV**, o primeiro bloco cifrado se repete e entrega que as mensagens começam igual. Por isso o IV precisa ser imprevisível e novo a cada mensagem.
+
+<Video id="nnQONZ_DRyk" title="Cipher Block Chaining (CBC)" meta="Neso Academy, 9 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="info">
+  O CBC foi o modo do TLS até a versão 1.2 e foi removido no TLS 1.3 (ver [Na prática](/docs/aulas/aula-04-modos-de-operacao-e-aead/na-pratica)). É um exemplo de **migração por remoção**: um modo seguro quando bem usado foi retirado porque os erros de uso eram comuns demais.
+</Callout>

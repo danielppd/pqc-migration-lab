@@ -1,0 +1,43 @@
+---
+title: "O alvo: segurança CPA, IV e nonce"
+description: Por que a cifração determinística nunca é segura e o que IV e nonce garantem
+---
+
+## Segurança contra texto claro escolhido (CPA)
+
+O adversário pode escolher o que é cifrado. Na Web, um script no navegador da vítima faz exatamente isso. O jogo:
+
+1. O adversário consulta um oráculo de cifração com mensagens à vontade.
+2. Envia um desafio `(m0, m1)` de mesmo tamanho.
+3. O desafiante sorteia `b` e devolve `c* = Enc(k, m_b)`.
+4. O adversário faz mais consultas e dá um palpite `b'`.
+
+**Segurança CPA:** para todo adversário eficiente, `Pr[b' = b] <= 1/2 + desprezível`.
+
+## Cifração determinística nunca é CPA segura
+
+<Steps>
+  <Step>O adversário pede ao oráculo `c0 = Enc(k, m0)`.</Step>
+  <Step>Envia o desafio `(m0, m1)` e recebe `c*`.</Step>
+  <Step>Se `c* = c0`, responde 0. Senão, responde 1. **Acerta com probabilidade 1.**</Step>
+</Steps>
+
+**Consequência:** cifrar duas vezes a mesma mensagem precisa dar textos cifrados **diferentes**. Todo modo seguro recebe, a cada mensagem, um ingrediente novo: um **IV aleatório** ou um **nonce** que nunca se repete.
+
+A cifra de bloco é determinística por definição. Usá-la diretamente na mensagem já perde o jogo.
+
+## IV e nonce não são a mesma coisa
+
+| | IV (CBC) | Nonce (CTR, GCM, ChaCha20) |
+|---|----------|----------------------------|
+| Exigência | Imprevisível para o atacante | Nunca repetir sob a mesma chave |
+| Contador serve? | Não | Sim, é a melhor escolha |
+| Aleatório serve? | Sim, é o exigido | Sim, com limite de mensagens por chave |
+| É secreto? | Não, viaja com o texto cifrado | Não, viaja com o texto cifrado |
+| Se errar | Vaza igualdade de prefixos; permite o BEAST | Vaza o XOR das mensagens; no GCM, permite falsificar |
+
+**Nonce** é a sigla de *number used once*: um número usado uma vez. A palavra já diz a regra.
+
+<Callout title="Aplicação no artigo" type="info">
+  A distinção entre "imprevisível" e "único" aparece de novo no handshake TLS: o `Random` do ClientHello e os key shares efêmeros precisam ser **novos a cada conexão**. Reutilizar um key share efêmero enfraqueceria o sigilo futuro.
+</Callout>

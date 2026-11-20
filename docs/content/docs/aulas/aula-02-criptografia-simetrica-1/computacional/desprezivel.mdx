@@ -1,0 +1,47 @@
+---
+title: Função desprezível e redução
+description: A linguagem assintótica e a técnica de prova das definições modernas
+---
+
+## Parâmetro de segurança e adversário eficiente
+
+O parâmetro n é normalmente o tamanho da chave. Usuários honestos rodam em tempo polinomial em n. O adversário **também** (PPT, algoritmo probabilístico de tempo polinomial), mas pode ser qualquer algoritmo.
+
+## Função desprezível
+
+`f(n)` é desprezível se, para todo polinômio p, existe N tal que `f(n) < 1/p(n)` para todo `n > N`. Em palavras: decresce **mais rápido que o inverso de qualquer polinômio**.
+
+| Função | Desprezível? |
+|--------|--------------|
+| `1/2^n` | Sim |
+| `1/2^(raiz de n)` | Sim |
+| `1/n^(log n)` | Sim |
+| `1/n^10` | Não |
+| `1/n^1000` | Não |
+
+Truque útil: `2^(log n) = n`, então `1/2^(log n) = 1/n`, que **não** é desprezível.
+
+## Por que "desprezível" é a noção certa
+
+Se f é desprezível e p é polinômio, então `p(n) * f(n)` é desprezível. Repetir um ataque eficiente um número polinomial de vezes não o torna bem-sucedido.
+
+Contraexemplo: se um sucesso de `1/n^10` fosse aceitável, repetir o ataque `n^10` vezes daria sucesso constante, ainda em tempo polinomial.
+
+## Indistinguibilidade computacional
+
+`Pr[A vence o jogo] <= 1/2 + negl(n)` para todo adversário A eficiente.
+
+## Como se prova: redução
+
+<Steps>
+  <Step>Suponha que A quebra o esquema Π.</Step>
+  <Step>Constrói-se um algoritmo B que usa A como sub-rotina.</Step>
+  <Step>B quebra a **suposição** (por exemplo, um gerador pseudoaleatório G).</Step>
+  <Step>Contrapositiva: se a suposição vale, ninguém quebra Π.</Step>
+</Steps>
+
+Por que não provar direto, sem suposição? Provar que G é seguro sem suposição resolveria problemas abertos como P versus NP.
+
+<Callout title="Aplicação no artigo" type="info">
+  A Aula 1 escreve a redução do ML-KEM nestes termos: se A quebra com vantagem ε em tempo t, existe B que resolve o problema difícil, e a perda `q` (tightness) define os **parâmetros concretos**. O vocabulário aparece nas referências do artigo.
+</Callout>

@@ -1,0 +1,41 @@
+---
+title: Visão geral da pesquisa
+description: Tema, justificativa e limites do estudo
+---
+
+## Tema
+
+Medição do **custo em bytes e em tempo** da migração da troca de chaves do TLS 1.3 de **X25519** para a híbrida **X25519MLKEM768**, com o objetivo de identificar **em que condições de rede esse custo deixa de ser desprezível**.
+
+## Justificativa da escolha
+
+| Critério | Como o tema atende |
+|----------|--------------------|
+| Pertence à engenharia da migração | A Aula 1 (slide 47) apresenta os números do problema e pergunta "onde esse tamanho cabe e onde não cabe?". A pesquisa responde essa pergunta por medição |
+| Escopo conservador | Não exige resultado novo de criptografia. A contribuição é medição rigorosa e reproduzível, espaço que a Aula 1 identifica como o mais acessível |
+| Viabilidade em cinco semanas | Executa em um notebook, com OpenSSL, Docker e scripts. O primeiro experimento já funciona |
+| Conexão com o conteúdo das aulas | Mobiliza modelo de ameaça, precedente do 3DES e Sweet32, KEM, troca híbrida, HNDL e a desigualdade de Mosca |
+| Aderência aos critérios de rigor | Linha de base clássica, mediana com IC 95%, ameaças à validade e repositório reproduzível |
+
+## Alternativas descartadas
+
+- **ZK, MPC e FHE:** exigem formalização matemática além do escopo desta pesquisa.
+- **Inventário criptográfico (CBOM):** relevante, mas a medição de "quanta criptografia há num código" é mais subjetiva e mais difícil de defender com rigor.
+- **Concrete ML (sugestão da Aula 1):** tema viável e de baixa complexidade, porém fora da linha de engenharia da migração.
+
+## Natureza da contribuição
+
+<Accordions type="single">
+  <Accordion title="Estudo de medição, não resultado novo de criptografia">
+    A Cloudflare e outros já publicaram números sobre o custo da troca híbrida. A contribuição aqui é um **setup reproduzível e aberto, com análise estatística e foco nos limites** (MTU, perda de pacotes).
+  </Accordion>
+  <Accordion title="Fontes primárias">
+    Datas e estimativas de 2026 vêm do material da disciplina e são confirmadas nas fontes primárias antes de citadas.
+  </Accordion>
+</Accordions>
+
+<Cards>
+  <Card title="Escopo" href="/docs/artigo/escopo">O que está dentro e fora.</Card>
+  <Card title="Pergunta e hipóteses" href="/docs/artigo/pergunta-e-hipoteses">O que a pesquisa quer responder.</Card>
+  <Card title="Cronograma" href="/docs/artigo/plano-entregas">Cinco semanas de trabalho.</Card>
+</Cards>

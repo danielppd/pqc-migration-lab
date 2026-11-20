@@ -1,0 +1,57 @@
+---
+title: Aula 4, modos de operação e AEAD
+description: ECB, CBC, CTR, AES-GCM e ChaCha20-Poly1305
+---
+
+**Tema:** o que precisa ser especificado, além da cifra de bloco, para que cifrar mensagens reais seja seguro. A aula percorre os modos de confidencialidade (ECB, CBC, CTR), seus ataques e a abstração moderna, a **cifração autenticada** (AEAD), com AES-GCM e ChaCha20-Poly1305.
+
+**Ponto de partida da aula:** o AES está correto, e mesmo assim o sistema vaza. A mesma imagem, cifrada com o mesmo AES-128 e a mesma chave, revela o desenho em modo ECB e não revela nada em modo CTR. **Só muda o modo de operação.**
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/f/f0/Tux_ecb.jpg"
+  alt="Imagem do pinguim Tux cifrada em modo ECB, com o contorno ainda visível"
+  caption="Um caso clássico: a imagem cifrada em ECB continua reconhecível. A aula usa uma imagem própria para o mesmo experimento, com AES-128."
+  credit="Larry Ewing e Lunkwill, Wikimedia Commons"
+  href="https://commons.wikimedia.org/wiki/File:Tux_ecb.jpg"
+/>
+
+## Objetivos
+
+1. Explicar por que uma cifra de bloco sozinha não cifra mensagens de forma segura.
+2. Calcular ECB, CBC e CTR em blocos concretos e prever o efeito de cada erro de configuração.
+3. Distinguir IV e nonce e explicar o que acontece quando são repetidos ou previsíveis.
+4. Descrever ataques ativos: inversão de bits, oráculo de padding e falsificação.
+5. Usar a interface AEAD e explicar o papel dos dados associados.
+6. Descrever o AES-GCM e o ChaCha20-Poly1305 em todas as operações.
+
+## Percurso
+
+<Steps>
+  <Step>
+    ### O problema
+    Blocos de tamanho fixo, padding, e a exigência de segurança contra texto claro escolhido (CPA).
+  </Step>
+  <Step>
+    ### Modos de confidencialidade
+    ECB (o que não fazer), CBC (encadeamento, IV e seus ataques) e CTR (fluxo de chave, nonce e maleabilidade).
+  </Step>
+  <Step>
+    ### Cifração autenticada
+    Por que sigilo não basta, a segurança contra texto cifrado escolhido (CCA), a interface AEAD, o AES-GCM e o ChaCha20-Poly1305.
+  </Step>
+  <Step>
+    ### Na prática
+    TLS 1.3, escolha de nonce e erros comuns.
+  </Step>
+</Steps>
+
+**Leitura de apoio da aula:** Katz e Lindell (3ª ed.), capítulos 3 e 5; NIST [SP 800-38A](https://csrc.nist.gov/pubs/sp/800/38/a/final) e [SP 800-38D](https://csrc.nist.gov/pubs/sp/800/38/d/final); [RFC 8439](https://www.rfc-editor.org/rfc/rfc8439) (ChaCha20-Poly1305).
+
+<Callout title="Aplicação no artigo" type="success">
+  Esta aula descreve a parte do TLS 1.3 que vem **depois** do handshake medido na pesquisa: os dados da aplicação são protegidos por AEAD (AES-GCM ou ChaCha20-Poly1305), com chaves derivadas do segredo que a troca de chaves (clássica ou híbrida) produz.
+</Callout>
+
+<Cards>
+  <Card title="Primeira página" href="/docs/aulas/aula-04-modos-de-operacao-e-aead/blocos-e-padding" />
+  <Card title="Direto ao AEAD" href="/docs/aulas/aula-04-modos-de-operacao-e-aead/aead" />
+</Cards>

@@ -1,0 +1,69 @@
+---
+title: "DES revisitado: as justificativas"
+description: Por que 64 bits de bloco, 56 de chave e 16 rodadas, e o que o hardware de 1977 ensinou
+---
+
+Os componentes do DES (Feistel, expansão E, S-boxes, permutação P, agenda de chaves) estão descritos na [Aula 2](/docs/aulas/aula-02-criptografia-simetrica-1/des/contexto). Esta página trata da pergunta seguinte: **por que cada parâmetro tem o valor que tem**.
+
+## Bloco de 64 bits e chave de 56 bits
+
+<Tabs items={['Bloco de 64 bits', 'Chave de 56 bits']}>
+  <Tab value="Bloco de 64 bits">
+    **Justificativa:** cabia nos registradores e barramentos da época e no volume de dados de 1977.
+
+    **Custo depois:** o limite do aniversário fica em `2^32` blocos, cerca de 32 GB, irrelevante em 1977 e fatal na Internet (Sweet32).
+  </Tab>
+  <Tab value="Chave de 56 bits">
+    **Justificativa oficial:** suficiente contra a tecnologia da época; os 8 bits restantes eram de paridade.
+
+    **Crítica imediata:** Diffie e Hellman (1977) estimaram uma máquina de cerca de US$ 20 milhões capaz de achar a chave em um dia.
+  </Tab>
+</Tabs>
+
+O DES escolheu valores baixos em duas das quatro alavancas de projeto. A estrutura interna resistiu por décadas, e foram esses dois parâmetros que cederam.
+
+## Por que 16 rodadas
+
+| Rodadas | Criptoanálise diferencial |
+|---------|---------------------------|
+| 8 | Cerca de `2^14` textos escolhidos (minutos em um PC) |
+| 16 | `2^47` textos escolhidos (inviável na prática) |
+
+- A difusão completa aparece perto da 5ª rodada.
+- As rodadas extras transformam ataques de minutos em ataques que exigem volumes de dados impossíveis.
+
+**A regra de projeto:** escolher rodadas suficientes para que o melhor ataque analítico conhecido não seja mais barato que a força bruta. Em 1977 a IBM já conhecia a diferencial e calibrou rodadas e S-boxes para ela. A linear (1993) não era conhecida, e mesmo assim exige `2^43` pares conhecidos.
+
+## O DES visto pela eficiência
+
+<Tabs items={['Em hardware: barato', 'Em software: caro']}>
+  <Tab value="Em hardware: barato">
+    - Permutações de bits (E, P, IP, PC-1, PC-2) são só fios, custo zero.
+    - S-boxes: 8 tabelas de 64 entradas de 4 bits.
+    - Feistel: um único circuito cifra e decifra.
+    - XOR e rotações de 28 bits são triviais.
+  </Tab>
+  <Tab value="Em software: caro">
+    - Permutar bits um a um exige deslocamentos e máscaras em cada passo.
+    - O processador trabalha com palavras, não com bits soltos.
+    - O 3DES multiplica tudo por três: 48 rodadas por bloco.
+  </Tab>
+</Tabs>
+
+**Lição que orientou o AES:** uma cifra para a década de 2000 precisava ser rápida em software de 8, 32 e 64 bits, não só em chips dedicados.
+
+## Escolhas de projeto, resumidas
+
+| Componente | Função | Por que assim | Custo |
+|------------|--------|---------------|-------|
+| Rede de Feistel | Estrutura das rodadas | f não precisa ser invertível; mesmo circuito cifra e decifra | Difusão lenta: metade do bloco por rodada |
+| Expansão E | Difusão | Cada bit de borda alimenta duas S-boxes | Nenhum em hardware |
+| S-boxes 6 para 4 | Confusão | Única não linearidade; projetadas contra a diferencial | 8 tabelas pequenas |
+| Permutação P | Difusão | Saída de cada S-box vai para S-boxes diferentes | Nenhum em hardware; caro em software |
+| Agenda de chaves | Subchaves de 48 bits | Rotações simples e seleção por PC-2 | Muito baixo |
+| 16 rodadas | Margem | Diferencial no limite do inviável | Proporcional às rodadas |
+| Chave de 56 e bloco de 64 | Parâmetros | Tecnologia e política de 1977 | Força bruta e limite do aniversário |
+
+<Callout title="Aplicação no artigo" type="success">
+  A tabela é um modelo do tipo de análise que a pesquisa faz com o ML-KEM: para cada escolha de projeto, **o que se ganha e o que custa**. No caso do híbrido, o custo dominante é em bytes.
+</Callout>

@@ -1,0 +1,42 @@
+---
+title: Decifração e implementação
+description: Camadas inversas, tabelas T, ataques de cache e AES em tempo constante
+---
+
+## Decifração
+
+| Cifração | Decifração | Custo da inversa |
+|----------|------------|------------------|
+| SubBytes | InvSubBytes: S-box inversa | Igual: outra tabela de 256 bytes |
+| ShiftRows | InvShiftRows: desloca para a direita | Igual: zero |
+| MixColumns (`02 03 01 01`) | InvMixColumns (`0e 0b 0d 09`) | Maior: mais `xtime` por byte |
+| AddRoundKey com `K1 ... K10` | AddRoundKey com `K10 ... K1` | Igual: XOR |
+
+**Diferença em relação ao Feistel:** no AES todo componente precisa de inversa, e a decifração é outro circuito. Isso não pesa porque os modos CTR e GCM usam **só a cifração**, até para decifrar.
+
+## Implementação em software: tabelas T
+
+<Tabs items={['A otimização', 'O problema (2005)']}>
+  <Tab value="A otimização">
+    SubBytes, ShiftRows e MixColumns viram 4 tabelas de 256 palavras de 32 bits (4 KB). Uma rodada passa a ser 16 consultas e 16 XOR de 32 bits. Só funciona porque o estado é organizado em bytes e colunas de 32 bits.
+  </Tab>
+  <Tab value="O problema (2005)">
+    Os índices das consultas dependem da chave, e o tempo de acesso depende do cache. Bernstein recuperou a chave medindo o tempo de um servidor pela rede. Osvik, Shamir e Tromer demonstraram ataques por cache entre processos na mesma máquina.
+  </Tab>
+</Tabs>
+
+> O algoritmo resistiu, a implementação mais rápida vazou. Segurança operacional inclui o tempo de execução.
+
+## A resposta: AES em tempo constante
+
+| Técnica | Como funciona |
+|---------|---------------|
+| **Instruções dedicadas** | AES-NI (Intel, 2010) e extensões do ARMv8: uma rodada por instrução, sem tabelas, em tempo constante. Vários GB/s por núcleo |
+| **Bitslicing** | Vários blocos em paralelo, bit a bit; a S-box é calculada por portas lógicas, sem consultas à memória (Käsper e Schwabe, 2009) |
+| **Mascaramento** | Em microcontroladores e cartões: dividir valores secretos em partes aleatórias contra análise de consumo de energia |
+
+A S-box definida por álgebra simples, e não por uma tabela arbitrária, é o que permite calculá-la em circuito e em instruções dedicadas.
+
+<Callout title="Aplicação no artigo" type="success">
+  Mesma lição do **KyberSlash** (Aula 1): o algoritmo é correto, e a falha está na implementação. Por isso o escopo da pesquisa declara implementação e canais laterais como **fora do modelo**, mas reconhece que é onde as quebras reais ocorrem.
+</Callout>

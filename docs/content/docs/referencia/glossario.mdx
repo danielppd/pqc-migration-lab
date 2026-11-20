@@ -1,0 +1,83 @@
+---
+title: Glossário
+description: Siglas e termos em uma linha cada, agrupados por tema
+---
+
+Os termos estão agrupados por tema. Novas aulas acrescentam linhas.
+
+## Fundamentos e modelo de ameaça
+
+| Termo | Em uma linha |
+|-------|--------------|
+| Gen, Enc, Dec | As três funções de um esquema de chave secreta |
+| Ciphertext | Mensagem cifrada |
+| Princípio de Kerckhoffs | O algoritmo é público e só a chave é secreta |
+| Modelo de ameaça | O que o adversário pode, quanto computa e o que conta como quebra |
+| COA, KPA, CPA, CCA | Capacidades do adversário, do mais fraco ao mais forte |
+| Segurança perfeita | Ver o ciphertext não ensina nada, mesmo com poder ilimitado |
+| OTP | One-Time Pad: XOR com chave aleatória, do tamanho da mensagem, de uso único |
+| PPT | Algoritmo probabilístico de tempo polinomial, o "adversário eficiente" |
+| Desprezível (negl) | Decresce mais rápido que 1 sobre qualquer polinômio |
+| Redução | Prova de que quebrar o esquema implica quebrar a suposição |
+| PRP | Permutação pseudoaleatória: indistinguível de uma permutação aleatória sem a chave |
+| Maleabilidade | Possibilidade de alterar o ciphertext de modo que o texto claro mude de forma previsível |
+
+## Cifras de bloco e modos de operação
+
+| Termo | Em uma linha |
+|-------|--------------|
+| Feistel | Rede em que o bloco é dividido em duas metades e se alterna qual é mascarada por f |
+| SPN | Rede de substituição e permutação: todo o bloco passa por S-boxes e por uma camada linear a cada rodada |
+| S-box | Tabela de substituição não linear, fonte de confusão |
+| Confusão e difusão | Relação complexa entre chave e ciphertext, e espalhamento de cada bit de entrada |
+| GF(2^8) | Corpo finito de 256 elementos, em que o AES define a S-box e o MixColumns |
+| xtime | Multiplicação por `02` em GF(2^8): deslocar um bit e, se necessário, XOR com `1b` |
+| Matriz MDS, número de ramificação | Garantia de difusão do MixColumns: bytes ativos de entrada e saída somam pelo menos 5 |
+| Trilha larga | Estratégia do AES que limita o número mínimo de S-boxes ativas por trilha de ataque |
+| Meet-in-the-middle | Ataque de encontro no meio: reduz a dupla cifração a cerca do custo de uma cifração |
+| Limite do aniversário | Colisões de blocos ficam prováveis após cerca de `2^(n/2)` blocos |
+| Modo de operação | Receita para cifrar mensagens longas com cifra de bloco |
+| Padding (PKCS#7) | Completa o último bloco com k bytes de valor k |
+| IV | Vetor de inicialização: valor imprevisível e novo a cada mensagem (CBC) |
+| Nonce | Número usado uma vez: nunca pode se repetir sob a mesma chave (CTR, GCM, ChaCha20) |
+| ECB | Modo em que blocos iguais geram ciphertexts iguais (o pinguim) |
+| CBC | Modo que combina cada bloco com o ciphertext anterior antes de cifrar |
+| CTR | Modo que cifra um contador para gerar um fluxo de chave |
+| Oráculo de padding | Ataque ao CBC que usa a resposta "padding válido ou inválido" para recuperar texto claro |
+
+## Cifração autenticada
+
+| Termo | Em uma linha |
+|-------|--------------|
+| AEAD | Cifração com autenticação e dados associados, numa única primitiva |
+| Dados associados (AD) | Informação autenticada mas não cifrada (cabeçalhos, números de sequência) |
+| Etiqueta (tag) | Valor que prova a integridade de nonce, dados associados e ciphertext |
+| AES-GCM | AES em modo CTR mais GHASH para autenticação |
+| GHASH | Polinômio avaliado em ponto secreto, em GF(2^128), usado no GCM |
+| ChaCha20 | Cifra de fluxo ARX (somas, rotações e XOR) |
+| Poly1305 | Autenticador de uso único, módulo `2^130 - 5` |
+| ARX | Operações de soma módulo `2^32`, rotação e XOR, de tempo constante |
+| AES-GCM-SIV | AEAD resistente a mau uso: nonce repetido só revela se as mensagens são iguais |
+
+## Criptografia pós-quântica e migração
+
+| Termo | Em uma linha |
+|-------|--------------|
+| Hash, MAC, KDF, HKDF | Resumo, autenticação com chave e derivação de chaves de sessão |
+| KEM | Mecanismo de encapsulamento de chave, substitui o Diffie-Hellman |
+| IND-CCA2 | Segurança exigida de um KEM |
+| EUF-CMA | Segurança exigida de uma assinatura |
+| Híbrido | Combina clássico e pós-quântico: quebrar um só não basta |
+| ML-KEM, ML-DSA | Padrões NIST de KEM e assinatura baseados em reticulados (FIPS 203 e 204) |
+| CRQC | Computador quântico capaz de quebrar a criptografia atual |
+| HNDL | Coletar agora, decifrar depois |
+| Shor, Grover | Algoritmos quânticos que quebram a chave pública e reduzem a margem da simétrica |
+| PQC | Criptografia pós-quântica: roda em computador clássico e resiste ao quântico |
+| QKD | Distribuição quântica de chaves (ex.: BB84). **Não** é o mesmo que PQC |
+| Agilidade criptográfica | Poder trocar algoritmo sem reescrever o sistema |
+| CBOM | Cryptographic Bill of Materials, inventário de onde há criptografia |
+| Handshake | Negociação inicial do TLS em que as chaves são combinadas |
+| ClientHello, ServerHello | Mensagens iniciais do handshake TLS, que carregam os key shares |
+| MTU | Maior pacote que cabe num enlace (tipicamente 1500 bytes) |
+| Middlebox | Equipamento de rede no caminho (firewall, balanceador) que pode quebrar com pacotes grandes |
+| IC 95% por bootstrap | Intervalo de incerteza estimado reamostrando os próprios dados |

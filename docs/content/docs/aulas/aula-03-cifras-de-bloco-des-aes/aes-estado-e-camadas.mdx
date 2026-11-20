@@ -1,0 +1,72 @@
+---
+title: AES, parâmetros, estado e visão geral
+description: Uma rede de substituição e permutação orientada a bytes
+---
+
+O AES é uma **rede de substituição e permutação** (SPN) orientada a **bytes**, com justificativa pública para cada componente.
+
+## Parâmetros
+
+| Variante | Chave | Rodadas | Palavras de chave |
+|----------|-------|---------|-------------------|
+| AES-128 | 128 bits | 10 | Nk = 4 |
+| AES-192 | 192 bits | 12 | Nk = 6 |
+| AES-256 | 256 bits | 14 | Nk = 8 |
+
+O **bloco é sempre de 128 bits**. O Rijndael original também aceitava blocos de 192 e 256; o padrão manteve só 128.
+
+<Tabs items={['Por que 128 bits de bloco', 'Por que mais rodadas para chaves maiores']}>
+  <Tab value="Por que 128 bits de bloco">
+    Leva o limite do aniversário para `2^64` blocos, cerca de 256 EiB por chave. Resolve de vez o problema do DES e do 3DES.
+  </Tab>
+  <Tab value="Por que mais rodadas para chaves maiores">
+    Ataques de recuperação de chave adivinham parte das subchaves das rodadas finais. Com mais bits de chave, o atacante pode adivinhar mais, e por isso cada 32 bits extras de chave ganham uma rodada.
+  </Tab>
+</Tabs>
+
+## O estado: 16 bytes em uma matriz 4 por 4
+
+A entrada de 16 bytes é organizada **por colunas**. No exemplo do FIPS 197 (apêndice B), o texto claro `32 43 f6 a8 88 5a 30 8d 31 31 98 a2 e0 37 07 34` forma:
+
+```
+32 88 31 e0
+43 5a 31 37
+f6 30 98 07
+a8 8d a2 34
+```
+
+- **Bytes, não bits:** todas as operações atuam em bytes inteiros. Nada de permutar bits isolados, o ponto fraco do DES em software.
+- **Colunas de 32 bits:** cada coluna cabe em um registrador de 32 bits. O MixColumns atua em uma coluna por vez, e as quatro são independentes.
+- Uma única organização atende cartões de 8 bits, servidores de 64 bits e hardware dedicado.
+
+## Visão geral da cifração
+
+```
+Texto claro → AddRoundKey(K0)
+            → 9 rodadas completas:  SubBytes → ShiftRows → MixColumns → AddRoundKey(Ki)
+            → rodada final (10):    SubBytes → ShiftRows → AddRoundKey(K10)
+            → Ciphertext
+```
+
+Ao todo, 11 chaves de rodada de 128 bits, geradas pela expansão de chave. A rodada final **não tem MixColumns** (ver [página própria](/docs/aulas/aula-03-cifras-de-bloco-des-aes/aes-addroundkey-e-rodada-final)).
+
+## Quatro camadas, quatro papéis
+
+| Camada | Tipo | Papel | Atua em |
+|--------|------|-------|---------|
+| SubBytes | Não linear | Confusão: única fonte de não linearidade | Cada byte, isoladamente |
+| ShiftRows | Linear (transposição) | Difusão entre colunas | Cada linha |
+| MixColumns | Linear (matriz em GF(2^8)) | Difusão dentro da coluna | Cada coluna |
+| AddRoundKey | Linear (XOR) | Única dependência da chave | O estado inteiro |
+
+Separar o não linear do linear não é estética: é o que permite contar S-boxes ativas e provar limites contra a criptoanálise diferencial e linear.
+
+## Para ver em movimento
+
+<Video id="O4xNJsjtN6E" title="AES Explained (Advanced Encryption Standard)" meta="Computerphile, 14 min, inglês" />
+
+<Video id="gP4PqVGudtg" title="AES Rijndael Cipher explained as a Flash animation" meta="AppliedGo, 4 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="success">
+  O AES-GCM (Aula 4) é a cifra simétrica que protege o tráfego **depois** do handshake que a pesquisa mede. Entender o AES explica por que essa parte é considerada pouco afetada pelo computador quântico e fica fora do escopo da migração.
+</Callout>

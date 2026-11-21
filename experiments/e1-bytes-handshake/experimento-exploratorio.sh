@@ -4,8 +4,9 @@
 #
 # O que faz: sobe um servidor TLS local, conecta com cada grupo de troca de chaves
 # e soma os bytes das mensagens de handshake em cada direcao.
-# Requer OpenSSL >= 3.5 (o openssl do macOS e LibreSSL e NAO serve).
-#   brew install openssl@3   (ou use /opt/homebrew/opt/openssl@3.6/bin/openssl)
+# Requer OpenSSL >= 3.5. O macOS traz de fabrica um openssl (/usr/bin/openssl) que e
+# LibreSSL e NAO serve. Este script usa por padrao o do Homebrew (variavel OPENSSL abaixo).
+#   brew install openssl@3   (instala em /opt/homebrew/opt/openssl@3.6/bin/openssl)
 
 set -euo pipefail
 

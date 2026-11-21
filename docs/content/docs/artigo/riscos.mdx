@@ -1,0 +1,17 @@
+---
+title: Riscos e plano B
+description: O que pode dar errado e como a pesquisa continua de pé
+---
+
+| Risco | Probabilidade | Plano B |
+|-------|---------------|---------|
+| Emular rede (netem) em Docker no macOS apresentar problemas | Média | Substituir por **modelo analítico** (RTT mais número de segmentos pela janela inicial), validado com poucas medições e com a limitação declarada |
+| macOS não permitir fixar CPU e turbo | Certa | Declarar como ameaça à validade e repetir as medições finais em Linux, se possível |
+| Diferença de CPU tão pequena que se perde no ruído | Média | É um **resultado válido** ("custo de CPU desprezível") e, com IC bem calculado, vira argumento |
+| Escopo crescer (certificados, ML-DSA, navegadores) | Alta | Registrar como **trabalho futuro** |
+| Interpretar o estudo como prova de segurança | Baixa | Reafirmar no [modelo de ameaças](/docs/artigo/modelo-de-ameacas): o artigo mede custo e assume a segurança do FIPS 203 |
+
+## Questões em aberto
+
+1. Um modelo de ameaças curto, que apenas justifique o cenário, é suficiente para um artigo de medição (e não de criptoanálise)?
+2. Uma biblioteca e uma plataforma de medição bastam como escopo, desde que as limitações fiquem declaradas?

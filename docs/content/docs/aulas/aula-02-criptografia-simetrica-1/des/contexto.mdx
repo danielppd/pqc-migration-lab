@@ -1,0 +1,44 @@
+---
+title: DES, contexto e cronologia
+description: O primeiro padrão público de cifra de bloco e o que a história dele ensina
+---
+
+O DES foi o **primeiro algoritmo criptográfico padronizado**. Antes do NIST existia o NBS, que abriu uma chamada pública por uma cifra padrão.
+
+## Linha do tempo
+
+| Ano | Evento |
+|-----|--------|
+| 1973 | NBS abre a chamada pública |
+| 1975 | Proposta da IBM, derivada do Lucifer, publicada para comentários |
+| 1977 | FIPS 46: DES vira padrão federal dos EUA |
+| 1990 | Criptoanálise diferencial (Biham e Shamir) |
+| 1993 | Criptoanálise linear (Matsui), executada em 1994 |
+| 1998 | Deep Crack (EFF), cerca de US$ 250 mil, recupera uma chave em 56 horas |
+| 1999 | FIPS 46-3 passa a recomendar o 3DES; Deep Crack e distributed.net levam 22 h 15 min |
+| 2023 | 3DES deixa de ser permitido para cifrar dados novos (NIST) |
+
+## O papel da NSA
+
+A NSA participou da revisão: a chave efetiva ficou em **56 bits** e as S-boxes foram alteradas. Ficou a suspeita de backdoor, que nunca foi comprovada. Em 1994 (Coppersmith) soube-se que a alteração **protegia** contra a criptoanálise diferencial, que a IBM conhecia desde 1974.
+
+<Callout title="A lição">
+  A Aula 2 destaca que há artigos mostrando que os números das S-boxes **não são arbitrários**. Não necessariamente um backdoor: pode ser um mecanismo de reforço. Parâmetros fixos sem explicação geram desconfiança, mesmo quando são bons.
+</Callout>
+
+<Video id="j53iXhTSi_s" title="Introduction to Data Encryption Standard (DES)" meta="Neso Academy, 8 min, inglês" />
+
+## Os parâmetros
+
+| Parâmetro | Valor | Observação |
+|-----------|-------|-----------|
+| Bloco | 64 bits | Texto claro e ciphertext |
+| Chave efetiva | 56 bits | A chave tem 64, dos quais 8 são de paridade e descartados |
+| Rodadas | 16 | De Feistel, idênticas, cada uma com sua subchave |
+| Subchave | 48 bits | Por rodada |
+
+O espaço de chaves é `2^56`, cerca de `7,2 * 10^16`. Em 1977 parecia suficiente, em 1998 uma máquina de US$ 250 mil fez a busca em dias. **O tamanho da chave foi o ponto fraco decisivo, não a estrutura.**
+
+<Callout title="Aplicação no artigo" type="success">
+  O DES é o precedente histórico mais próximo de uma migração: a estrutura aguentou décadas, e os parâmetros (chave de 56 bits, bloco de 64) é que envelheceram. Uma migração criptográfica costuma ser uma troca de parâmetros e de formatos, e isso custa engenharia.
+</Callout>

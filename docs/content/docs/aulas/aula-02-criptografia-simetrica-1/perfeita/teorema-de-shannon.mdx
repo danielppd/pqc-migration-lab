@@ -1,0 +1,41 @@
+---
+title: O teorema de Shannon
+description: Por que o limite do OTP é inevitável
+---
+
+> Se o esquema é perfeitamente seguro, então `|K| >= |M|`.
+
+O One-Time Pad não é ineficiente por descuido: ele é **ótimo**. Nenhuma cifra perfeita usa chaves menores que a mensagem.
+
+## A prova, por contradição
+
+<Steps>
+  <Step>Suponha `|K| < |M|` e mensagens uniformes. (A primeira linha, "suponha o contrário", já diz que é prova por contradição.)</Step>
+  <Step>Fixe um ciphertext c possível e decifre com todas as chaves.</Step>
+  <Step>Isso produz no máximo `|K|` mensagens candidatas.</Step>
+  <Step>Como `|K| < |M|`, existe uma mensagem m que **nenhuma chave** produz a partir de c.</Step>
+  <Step>Então `Pr[M = m | C = c] = 0`, mas `Pr[M = m] = 1/|M| > 0`. Contradição. ∎</Step>
+</Steps>
+
+**Consequência:** para mensagens de n bits, são necessárias pelo menos `2^n` chaves, ou seja, chaves de pelo menos n bits.
+
+## Caracterização
+
+Se `|M| = |K| = |C|`, o esquema é perfeitamente seguro se e somente se:
+
+1. Cada chave é escolhida por `Gen` com probabilidade exatamente `1/|K|`.
+2. Para cada mensagem m e cada ciphertext c existe **exatamente uma** chave k com `Enc_k(m) = c`.
+
+O OTP satisfaz as duas. O XOR com 1 byte de chave sobre mensagens de 2 bytes viola a condição 2 (nenhuma chave leva `41 41` em `00 01`). Toda cifra perfeita com espaços de mesmo tamanho é, estruturalmente, um OTP.
+
+## O que isso custa
+
+| Oferece | Custa |
+|---------|-------|
+| Segurança incondicional: nenhum adversário, clássico ou quântico, com qualquer tempo, aprende algo | Uma chave aleatória nova, do tamanho de cada mensagem, combinada antes por canal seguro e destruída depois |
+
+Para cifrar a Internet com chaves de 128 ou 256 bits, **abrimos mão do adversário ilimitado**. É a troca que define a segurança computacional, próxima seção.
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. Fica a ideia de **troca explícita**: toda escolha criptográfica abre mão de algo. O híbrido X25519 + ML-KEM é uma dessas trocas, pagando bytes por proteção dupla.
+</Callout>

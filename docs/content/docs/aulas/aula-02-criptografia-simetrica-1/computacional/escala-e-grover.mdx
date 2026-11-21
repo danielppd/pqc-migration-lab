@@ -1,0 +1,33 @@
+---
+title: Escala de 2^n e o computador quântico
+description: Quanto é 2^128, e o que o Grover muda
+---
+
+## Quanto é 2^128
+
+Tempo para testar todas as chaves a `10^21` tentativas por segundo (a rede Bitcoin gira perto de 1 zettahash por segundo em 2026, segundo o material da disciplina):
+
+| Chave | Tempo |
+|-------|-------|
+| `2^40` | 1 ns |
+| `2^56` (DES) | 72 µs |
+| `2^64` | 18 ms |
+| `2^80` | 20 min |
+| `2^112` (3DES) | 165 mil anos |
+| `2^128` (AES-128) | 10,8 bilhões de anos |
+| `2^256` (AES-256) | 3,7 vezes `10^48` anos |
+
+**Cada bit a mais dobra o tempo.** Parâmetros são uma aposta contra o futuro: o dado cifrado hoje precisa continuar protegido daqui a décadas.
+
+## E o computador quântico
+
+| Algoritmo | Efeito na simétrica | Na prática |
+|-----------|--------------------|------------|
+| **Grover** | Busca em cerca da raiz quadrada do número de chaves: chave de n bits oferece cerca de n/2 bits | É sequencial, paraleliza mal e exige um circuito de AES inteiro por passo. AES-128 segue aceitável segundo o NIST, AES-256 é exigido pela CNSA 2.0 |
+| **One-Time Pad** | Nenhum | Segurança perfeita vale contra qualquer adversário, inclusive quântico |
+
+**A simétrica é a parte menos afetada pela computação quântica.** O estrago grande está na criptografia de chave pública, que é o próximo bloco do estudo.
+
+<Callout title="Aplicação no artigo" type="success">
+  Justifica o **escopo**: a pesquisa trata da troca de chaves (chave pública, atingida por Shor) e mantém a cifra simétrica do tráfego (AES-GCM, pouco afetada) como está. Sem esse raciocínio, a pergunta "por que só a troca de chaves?" fica sem resposta.
+</Callout>

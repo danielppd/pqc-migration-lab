@@ -1,0 +1,40 @@
+---
+title: Objetivo da quebra e recursos
+description: O que conta como quebrar e quanto poder o adversário tem
+---
+
+## O objetivo, do mais fraco ao mais forte
+
+| Objetivo do adversário | Problema de exigir só isso |
+|------------------------|----------------------------|
+| Recuperar a chave | Fraco demais: `Enc(m) = m` não revela a chave e é inútil |
+| Recuperar a mensagem inteira | Ainda fraco: revelar metade seria aceitável? |
+| Recuperar parte da mensagem | Melhor, mas um único bit pode bastar (sim ou não, vende ou compra) |
+| Aprender **qualquer** informação | **É o objetivo da criptografia moderna**: o ciphertext não deve ajudar em nada |
+
+Quanto mais embaixo, mais forte a definição. A segurança deve impedir o objetivo mais modesto do adversário.
+
+## Recursos: ilimitado ou limitado
+
+<Tabs items={['Poder ilimitado', 'Poder limitado']}>
+  <Tab value="Poder ilimitado">
+    **Segurança incondicional** (teórica da informação). Vale para qualquer adversário, com qualquer tempo, inclusive quântico. Preço: chaves enormes. É o assunto da próxima seção.
+  </Tab>
+  <Tab value="Poder limitado">
+    **Segurança computacional**. Vale contra adversários eficientes e depende de suposições (por exemplo, que um gerador pseudoaleatório existe). É o que se usa na prática.
+  </Tab>
+</Tabs>
+
+Clássico ou quântico é uma dimensão a mais dos recursos. A incondicional não é afetada pelo quântico, a computacional precisa ser reavaliada.
+
+## Recursos mudam a gravidade
+
+Uma quebra COA feita num computador pessoal é muito mais crítica que a mesma quebra exigindo um computador quântico. A Aula 2 traz um caso: um candidato pós-quântico (soou como SIKE) foi quebrado no notebook de uma pesquisadora, enquanto o esquema se defendia de computadores quânticos.
+
+## Ataque válido não é ataque prático
+
+KyberSlash mede o consumo de energia da CPU e deriva a chave. É válido, mas exige acesso à máquina que cifra e um equipamento de medição. O modelo de ameaça é fraco **do ponto de vista do atacante**: ele precisa de muita coisa. O ataque mais viável é o que recupera a chave **só vendo o ciphertext**.
+
+<Callout title="Aplicação no artigo" type="success">
+  O modelo de ameaças do artigo declara os **recursos** do adversário: um computador quântico tolerante a falhas (CRQC), que ainda não existe.
+</Callout>

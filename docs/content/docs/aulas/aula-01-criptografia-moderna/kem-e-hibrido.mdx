@@ -1,0 +1,81 @@
+---
+title: KEM e troca de chaves híbrida
+description: O que substitui o Diffie-Hellman e por que combinar dois mecanismos
+---
+
+## O que é um KEM
+
+**Key Encapsulation Mechanism.** Em vez de os dois lados trocarem valores e chegarem a um segredo (Diffie-Hellman), um lado gera um par de chaves e o outro **encapsula** um segredo dentro de um ciphertext.
+
+```
+Alice                                         Bob
+KeyGen() -> (ek, dk)
+        ek (1.184 B em ML-KEM-768)  ────────►
+                                       Encaps(ek) -> (K, c)
+        ◄────────  c (1.088 B em ML-KEM-768)
+Decaps(dk, c) -> K
+ambos obtêm a mesma chave K (32 B)
+```
+
+- Bob **não escolhe** K: ele é gerado dentro de `Encaps`. Isso simplifica as provas e evita mensagens malformadas.
+- Segurança exigida: **IND-CCA2**. O ML-KEM obtém isso com a transformação **Fujisaki-Okamoto** sobre um esquema IND-CPA.
+- O KEM **substitui o Diffie-Hellman efêmero** em TLS 1.3, SSH, Signal e VPNs.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/4/46/Diffie-Hellman_Key_Exchange.svg"
+  alt="Esquema de troca de chaves Diffie-Hellman com cores"
+  caption="Diffie-Hellman: o que o KEM vem substituir. Cada lado combina um segredo próprio com o valor público do outro."
+  credit="Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:Diffie-Hellman_Key_Exchange.svg"
+/>
+
+## Tamanhos (valores das especificações, segundo o material da disciplina)
+
+| Esquema | Nível NIST | Chave pública (B) | Ciphertext (B) |
+|---------|-----------|-------------------|----------------|
+| X25519 (clássico) | n/a | 32 | 32 |
+| ML-KEM-512 | 1 | 800 | 768 |
+| **ML-KEM-768** | 3 | 1.184 | 1.088 |
+| ML-KEM-1024 | 5 | 1.568 | 1.568 |
+| HQC-1 | 1 | 2.249 | 4.433 |
+| Classic McEliece 348864 | 1 | 261.120 | 96 |
+
+ML-KEM-768 virou o padrão de fato: rápido, tamanhos aceitáveis, implementações verificadas formalmente. Nível 1 corresponde a AES-128, nível 3 a AES-192, nível 5 a AES-256.
+
+## Troca híbrida
+
+```
+K = KDF( K_X25519 || K_ML-KEM || transcrição )
+```
+
+O adversário precisa quebrar **as duas** componentes. Protege contra um computador quântico futuro **e** contra uma falha ainda desconhecida no ML-KEM.
+
+**Grupo padrão no TLS 1.3:** `X25519MLKEM768`, padrão no Chrome desde a v131 (nov/2024), no Firefox, na Cloudflare e no OpenSSH 10 (abr/2025).
+
+<Video id="_MoRcYLN-7U" title="Post Quantum Cryptography" meta="Computerphile, 13 min, inglês" />
+
+## O custo em bytes no ClientHello
+
+O ClientHello pode passar de um pacote. Em varredura da Cloudflare, cerca de **0,34%** das origens falharam ao receber o key share pós-quântico primeiro, por servidores antigos e middleboxes. Fonte: [Automatic Key Exchange (Cloudflare)](https://blog.cloudflare.com/automatic-key-exchange-for-origins/).
+
+## O KEM dentro do handshake TLS 1.3
+
+<Steps>
+  <Step>
+    **ClientHello:** o cliente gera um par de chaves efêmero e envia a chave pública na extensão `key_share`. No grupo `X25519MLKEM768`, são 32 B do X25519 mais 1.184 B da chave de encapsulamento do ML-KEM-768, ou **1.216 B** de key share.
+  </Step>
+  <Step>
+    **ServerHello:** o servidor executa `Encaps` sobre a chave recebida e devolve o ciphertext no `key_share`: 32 B do X25519 mais 1.088 B do ML-KEM, ou **1.120 B**.
+  </Step>
+  <Step>
+    **Derivação:** ambos obtêm os dois segredos e os combinam no KDF junto com a transcrição. A partir daí, as chaves de sessão do AEAD (AES-GCM ou ChaCha20-Poly1305) são derivadas do resultado.
+  </Step>
+</Steps>
+
+O custo extra da migração concentra-se, portanto, em **duas mensagens**: a chave pública do cliente e o ciphertext do servidor. É essa diferença de bytes que o experimento E1 mede, e que decide se o ClientHello continua cabendo num único pacote.
+
+<Video id="JA0vaIb4158" title="TLS 1.3 Handshake: many changes from prior versions" meta="Practical Networking, 18 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="success">
+  Página central para o experimento: a comparação entre `X25519` e `X25519MLKEM768` mede exatamente os 1.184 B de chave pública e os 1.088 B de ciphertext do ML-KEM-768. O ClientHello de 210 B para 1.388 B observado no experimento E1 decorre diretamente desta tabela.
+</Callout>

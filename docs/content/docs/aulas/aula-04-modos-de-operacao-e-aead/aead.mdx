@@ -1,0 +1,44 @@
+---
+title: AEAD, a interface moderna
+description: Cifrar, autenticar e ligar a mensagem ao seu contexto numa única primitiva
+---
+
+**Authenticated Encryption with Associated Data:** uma única primitiva que cifra, autentica e liga a mensagem ao seu contexto.
+
+## A interface
+
+```
+Enc(K, N, A, P)  →  C ǁ T
+Dec(K, N, A, C ǁ T)  →  P   ou uma falha única
+
+K  chave           N  nonce           A  dados associados
+P  texto claro     C  texto cifrado   T  etiqueta de autenticação
+```
+
+| O que garante | A única regra |
+|---------------|---------------|
+| **Sigilo** de `P` e **integridade** de `N`, `A` e `C` juntos: qualquer alteração faz `Dec` falhar | Nunca repetir `N` sob a mesma `K` |
+
+Sem modo para escolher, sem MAC para encaixar, sem padding. Menos peças, menos erros.
+
+## Dados associados: autenticar sem cifrar
+
+<Tabs items={['Cabeçalhos de rede', 'Número de sequência', 'Identificador do registro']}>
+  <Tab value="Cabeçalhos de rede">
+    Endereços, portas, tipo e versão do registro TLS precisam ser lidos pelo caminho, mas não podem ser alterados sem que o destinatário perceba.
+  </Tab>
+  <Tab value="Número de sequência">
+    Impede reordenar, repetir ou descartar mensagens sem que o destinatário perceba.
+  </Tab>
+  <Tab value="Identificador do registro">
+    O identificador da linha no banco como dado associado: a cifra só vale naquele lugar.
+  </Tab>
+</Tabs>
+
+> O recorta e cola do ECB morre aqui: com o identificador do aluno como dado associado, a nota de outro aluno colada no registro seria rejeitada na verificação.
+
+<Video id="od44W45sCQ4" title="What Are AEAD Ciphers?" meta="F5 DevCentral, 11 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="success">
+  No TLS 1.3, o cabeçalho de cada registro entra como **dado associado**, e o número de sequência compõe o nonce. O handshake que a pesquisa mede produz as chaves usadas por esse AEAD.
+</Callout>

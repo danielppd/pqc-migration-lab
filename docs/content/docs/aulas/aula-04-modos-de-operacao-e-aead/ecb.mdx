@@ -1,0 +1,79 @@
+---
+title: ECB, o modo que não se deve usar
+description: Cada bloco cifrado sozinho, o pinguim e o recorta e cola
+---
+
+**Electronic Codebook.** O modo mais simples e o exemplo clássico do que não fazer.
+
+```
+Ci = EK(Pi)        (cifração)
+Pi = DK(Ci)        (decifração)
+```
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/d/d6/ECB_encryption.svg"
+  alt="Diagrama do modo ECB na cifração"
+  caption="ECB: cada bloco de texto claro é cifrado de forma independente com a mesma chave."
+  credit="WhiteTimberwolf, Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:ECB_encryption.svg"
+/>
+
+| Parece bom | Problema |
+|------------|----------|
+| Simples, paralelo nos dois sentidos, acesso direto a qualquer bloco | Blocos iguais viram blocos cifrados iguais, em qualquer posição e em qualquer mensagem |
+
+## Blocos iguais, cifras iguais
+
+Numa mensagem com os blocos `SIM SIM SIM SIM`, `SIM SIM SIM SIM` e `NAO NAO NAO NAO`, os blocos 1 e 2 do texto cifrado são idênticos. Sem a chave, o observador já sabe que os blocos 1 e 2 da mensagem são iguais.
+
+## O pinguim
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/5/56/Tux.jpg"
+  alt="Imagem original do pinguim Tux"
+  caption="Imagem original."
+  credit="Larry Ewing, Wikimedia Commons"
+  href="https://commons.wikimedia.org/wiki/File:Tux.jpg"
+/>
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/f/f0/Tux_ecb.jpg"
+  alt="Pinguim Tux cifrado em modo ECB, com o contorno ainda visível"
+  caption="A mesma imagem cifrada em ECB: o contorno continua reconhecível."
+  credit="Larry Ewing e Lunkwill, Wikimedia Commons"
+  href="https://commons.wikimedia.org/wiki/File:Tux_ecb.jpg"
+/>
+
+Na imagem da aula, dos 6.912 blocos, só 83 são distintos depois de cifrados. Trocar a chave muda as cores, não o desenho.
+
+<Tabs items={['Área uniforme', 'Mesmo bloco, mesma cifra', 'Bordas']}>
+  <Tab value="Área uniforme">
+    Uma cor em RGB repete 3 bytes. Com blocos de 16 bytes, uma área uniforme gera só 3 blocos diferentes.
+  </Tab>
+  <Tab value="Mesmo bloco, mesma cifra">
+    Em ECB, cada um desses blocos vira sempre o mesmo texto cifrado: a área continua uniforme.
+  </Tab>
+  <Tab value="Bordas">
+    Onde a cor muda surgem blocos novos. O contorno da figura reaparece no texto cifrado.
+  </Tab>
+</Tabs>
+
+O ECB preserva a **estrutura de igualdade** da mensagem. Imagens, tabelas e arquivos com campos repetidos vazam do mesmo jeito.
+
+## Recorta e cola
+
+Numa tabela de notas cifrada em ECB, cada registro ocupa blocos próprios. Nada liga um bloco à sua posição ou à sua mensagem, então blocos podem ser **trocados, repetidos ou reordenados**: um atacante monta um registro com o bloco da nota alta de outro aluno, e a decifração produz `ALUNO: BRUNO NOTA: 10,0`. Sem erro, sem chave, sem quebrar o AES.
+
+## Veredito
+
+| Propriedade | Situação |
+|-------------|----------|
+| Confidencialidade | Não é CPA seguro: vaza blocos iguais dentro e entre mensagens |
+| Integridade | Nenhuma: blocos podem ser recortados, colados e reordenados |
+| Normas | O NIST propôs (SP 800-131A Rev. 3, rascunho de 2024) aposentar o ECB como modo de confidencialidade |
+
+**Lição:** a entrada da cifra de bloco nunca pode se repetir. Os próximos modos garantem isso de dois jeitos: **encadeando** (CBC) ou **contando** (CTR).
+
+<Callout title="Aplicação no artigo" type="info">
+  Exemplo didático do princípio central da aula: segurança depende do **esquema completo**, não da primitiva. O AES é o mesmo, e a segurança muda por completo com o modo.
+</Callout>

@@ -1,0 +1,46 @@
+---
+title: Expansão de chave
+description: De onde vêm as 11 chaves de rodada do AES-128
+---
+
+## A regra (AES-128)
+
+Trabalha-se com palavras de 32 bits, `w0, w1, ...`:
+
+```
+w0 ... w3:  a própria chave
+w_i = w_(i-4) XOR w_(i-1)                se i não é múltiplo de 4
+w_i = w_(i-4) XOR T(w_(i-1))             se i é múltiplo de 4
+T = RotWord, SubWord, XOR com Rcon
+```
+
+## Exemplo: da chave à primeira chave de rodada
+
+Chave do apêndice A do FIPS 197: `2b7e1516 28aed2a6 abf71588 09cf4f3c`.
+
+| Etapa | Valor |
+|-------|-------|
+| `w3` | `09cf4f3c` |
+| RotWord | `cf4f3c09` |
+| SubWord | `8a84eb01` |
+| XOR com Rcon (`01`) | `8b84eb01` |
+| XOR com `w0` (`2b7e1516`) | `a0fafe17` = `w4` |
+
+Chave de rodada 1: `a0fafe17 88542cb1 23a33939 2a6c7605`.
+
+**Constantes de rodada (Rcon):** `01 02 04 08 10 20 40 80 1b 36`, as potências de `02` no corpo.
+
+## Por que a expansão é assim
+
+| Elemento | Função |
+|----------|--------|
+| **SubWord** | Não linearidade: as chaves de rodada não são combinações lineares da chave |
+| **Rcon** | Torna as rodadas diferentes entre si, bloqueando ataques de deslizamento e quebrando simetrias |
+| **Sob demanda** | Cada chave de rodada sai da anterior: pouca memória em cartões e sensores |
+| **O preço** | Expansão invertível e leve: uma chave de rodada vazada revela a chave. Existem ataques de chaves relacionadas ao AES-256 (2009) |
+
+É mais uma escolha consciente: uma agenda leve e rápida, que aceita fraquezas em modelos de ataque que não ocorrem quando as chaves são geradas ao acaso.
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. A observação "uma fraqueza só importa se o modelo de ameaça a permite" (chaves relacionadas não ocorrem com chaves aleatórias) é um exemplo do rigor de **delimitar o modelo** antes de avaliar um ataque.
+</Callout>

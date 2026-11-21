@@ -1,0 +1,40 @@
+---
+title: Os dois relaxamentos
+description: Como abrir mão do adversário onipotente sem abrir mão do rigor
+---
+
+Para ter chaves curtas, aceitamos dois relaxamentos. São os **mínimos possíveis**, porque cobrem exatamente os dois ataques que nenhuma cifra de chave curta evita.
+
+| Ataque inevitável | Como funciona | Relaxamento correspondente |
+|-------------------|---------------|----------------------------|
+| Busca exaustiva | Testar todas as chaves, tempo proporcional ao tamanho do espaço de chaves | O adversário tem **tempo limitado** (é eficiente) |
+| Adivinhar a chave | Escolher uma chave ao acaso, tempo constante, sucesso de 1 sobre o número de chaves | Toleramos probabilidade de sucesso **muito pequena** |
+
+## Duas linguagens para a mesma ideia
+
+| | Concreta | Assintótica |
+|---|----------|-------------|
+| Adversário | Tempo até t | Polinomial em n (PPT) |
+| Sucesso tolerado | Até ε | Desprezível em n |
+| Serve para | Escolher parâmetros ("128 bits") | Definir e provar |
+
+## (t, ε)-segurança
+
+Nenhum adversário com tempo até t vence com probabilidade maior que ε. No jogo, "vencer" é ter vantagem maior que ε sobre o chute de 1/2.
+
+Exemplo com chave de 128 bits: uma busca exaustiva com t tentativas acerta com probabilidade `t / 2^128`. Com `t = 2^60`, o sucesso é `1/2^68`, cerca de 3 em `10^21`.
+
+"128 bits de segurança" significa que o **melhor ataque conhecido** precisa de cerca de `2^128` operações. Isso não diz nada sobre ataques ainda não descobertos.
+
+## Perfeita contra computacional
+
+| | Perfeita | Computacional |
+|---|----------|---------------|
+| Adversários | Todos, poder ilimitado | Só os eficientes |
+| Sucesso permitido | Exatamente 1/2 | 1/2 mais algo desprezível |
+| Tamanho da chave | Pelo menos o da mensagem | Pode ser 128 ou 256 bits |
+| Depende de suposições | Não | **Sim** |
+
+<Callout title="Aplicação no artigo" type="success">
+  "Depende de suposições" é o ponto central da tabela. O ML-KEM é seguro **assumindo** que Module-LWE é difícil, e a estrutura algébrica ainda não tem prova de que não ajude o atacante (Aula 1). É por isso que existe o híbrido.
+</Callout>

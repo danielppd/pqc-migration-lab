@@ -1,0 +1,50 @@
+---
+title: AddRoundKey e a rodada final
+description: Por que a chave entra nas pontas e por que a última rodada não tem MixColumns
+---
+
+## AddRoundKey
+
+XOR byte a byte do estado com a chave de rodada `Ki`. Custo: 16 XOR. É a **única camada que depende da chave**.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/a/ad/AES-AddRoundKey.svg"
+  alt="Diagrama do AddRoundKey do AES"
+  caption="AddRoundKey: cada byte do estado é combinado por XOR com o byte correspondente da chave de rodada."
+  credit="Matt Crypto, Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:AES-AddRoundKey.svg"
+/>
+
+## Por que a chave entra no início e no fim
+
+<Tabs items={['No início', 'No fim']}>
+  <Tab value="No início">
+    Se a cifra começasse por SubBytes, o atacante aplicaria essa etapa ao texto claro por conta própria. A chave `K0` impede isso.
+  </Tab>
+  <Tab value="No fim">
+    Pelo mesmo motivo: sem a chave final, as últimas camadas públicas seriam desfeitas a partir do ciphertext.
+  </Tab>
+</Tabs>
+
+Toda camada pública fica entre duas adições de chave. Nenhuma parte do algoritmo pode ser removida de graça pelo atacante.
+
+## Por que a última rodada não tem MixColumns
+
+**O argumento.** MixColumns é linear, e AddRoundKey também. Logo:
+
+```
+MC(x) XOR K = MC(x XOR K'),   com K' = MC^-1(K)
+```
+
+Um MixColumns final pode ser movido para depois da chave e desfeito pelo atacante.
+
+| Consequência | Resultado |
+|--------------|-----------|
+| Para a segurança | Nenhuma: o MixColumns final não protege nada |
+| Para a eficiência | Uma multiplicação de matriz a menos e uma decifração com a mesma estrutura da cifração, com as camadas inversas |
+
+**Regra geral de projeto:** não incluir uma etapa cuja contribuição para a segurança é nula. Ela só custa ciclos e área.
+
+<Callout title="Aplicação no artigo" type="info">
+  A mesma regra vale para formatos de protocolo: uma etapa que não acrescenta segurança é custo puro. Na análise de migração, isso ajuda a separar bytes que protegem (key shares) de bytes que apenas ocupam espaço.
+</Callout>

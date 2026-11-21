@@ -1,0 +1,58 @@
+---
+title: A ameaça quântica
+description: Shor, Grover, CRQC, coletar agora decifrar depois e a desigualdade de Mosca
+---
+
+## Duas ameaças, pesos muito diferentes
+
+| | Shor (1994) | Grover (1996) |
+|---|-------------|---------------|
+| O que faz | Fatoração e log discreto em tempo polinomial | Busca não estruturada em `O(raiz de N)` consultas |
+| Efeito | **Quebra total** de RSA, DH, ECDH, ECDSA, EdDSA. Nenhum ajuste de parâmetro resolve | Reduz a margem de chaves simétricas e hashes, com custo prático alto |
+| Resposta | **Substituir** as primitivas | Manter ou dobrar tamanhos |
+
+<Video id="lvTqbM5Dq4Q" title="How Quantum Computers Break Encryption (Shor's Algorithm)" meta="minutephysics, 18 min, inglês" />
+
+## O que é um CRQC
+
+**Cryptographically Relevant Quantum Computer:** máquina tolerante a falhas com milhares de qubits lógicos e bilhões de portas Toffoli. **Nenhum existe hoje.** A questão é a velocidade com que hardware, correção de erros e algoritmos reduzem a distância.
+
+As estimativas de recursos caem rápido (segundo o material da disciplina): RSA-2048 passou de cerca de 1 bilhão de qubits físicos (2012) para menos de 1 milhão (2025). Curvas elípticas exigem menos recursos que RSA, então **caem primeiro**.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Bloch_sphere.svg"
+  alt="Esfera de Bloch representando o estado de um qubit"
+  caption="Esfera de Bloch: um qubit não é só 0 ou 1, é um ponto na esfera. É daí que vem o poder (e a fragilidade) de um computador quântico."
+  credit="Smite-Meister, Wikimedia Commons, CC BY-SA 3.0"
+  href="https://commons.wikimedia.org/wiki/File:Bloch_sphere.svg"
+/>
+
+## Coletar agora, decifrar depois
+
+Tráfego capturado hoje pode ser decifrado quando um CRQC existir. A **desigualdade de Mosca** organiza a decisão:
+
+```
+x + y > z   →   o dado já está exposto
+
+x: tempo que o dado precisa ficar secreto
+y: tempo para migrar os sistemas
+z: tempo até existir um CRQC
+```
+
+<Accordions type="single">
+  <Accordion title="Exemplo numérico (ilustrativo)">
+    Um prontuário médico precisa ficar secreto por `x = 20` anos. Migrar o sistema leva `y = 5` anos. Se um CRQC surgir em `z = 15` anos, então `25 > 15` e o dado **já está exposto hoje**, porque pode ser gravado agora e aberto depois.
+  </Accordion>
+</Accordions>
+
+<Video id="TU9CRyAOekQ" title="Defeat the Quantum Menace: Protecting Data from Quantum Computers" meta="IBM Technology, 19 min, inglês" />
+
+## O padrão que define o escopo
+
+<Callout title="Confidencialidade migra primeiro, autenticação depois">
+  A confidencialidade protege contra **coleta para decifração futura**, então tem urgência. A autenticação só precisa resistir ao adversário quântico **no momento da conexão**, então pode esperar. É por isso que o TLS migrou primeiro a troca de chaves (slide 17 da Aula 1).
+</Callout>
+
+<Callout title="Aplicação no artigo" type="success">
+  Este é o argumento que justifica **medir só a troca de chaves** e tratar certificados e assinaturas como extensão futura.
+</Callout>

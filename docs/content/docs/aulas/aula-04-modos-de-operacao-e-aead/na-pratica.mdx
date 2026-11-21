@@ -1,0 +1,64 @@
+---
+title: "Na prática: TLS 1.3, nonces e erros comuns"
+description: Onde esses AEADs aparecem, como os protocolos escolhem nonces e os erros que ainda ocorrem
+---
+
+## TLS 1.3: só AEAD
+
+| Suíte do TLS 1.3 | AEAD |
+|------------------|------|
+| `TLS_AES_128_GCM_SHA256` | AES-128-GCM |
+| `TLS_AES_256_GCM_SHA384` | AES-256-GCM |
+| `TLS_CHACHA20_POLY1305_SHA256` | ChaCha20-Poly1305 |
+| `TLS_AES_128_CCM_SHA256` | AES-128-CCM |
+
+**CBC, RC4 e MAC separado foram removidos.** O nonce é `IV fixo XOR número de sequência`: nunca se repete na conexão e não é enviado pela rede. O cabeçalho do registro entra como dado associado.
+
+## Como escolher nonces
+
+<Tabs items={['Contador', 'Aleatório de 96 bits', 'Aleatório de 192 bits', 'Resistente a mau uso']}>
+  <Tab value="Contador">
+    Melhor escolha com estado confiável. **Risco:** reinício, snapshot de máquina virtual, dispositivo clonado.
+  </Tab>
+  <Tab value="Aleatório de 96 bits">
+    Sem estado. Colisão de aproximadamente `q^2 / 2^97` após `q` mensagens: limite de `2^32` mensagens por chave.
+  </Tab>
+  <Tab value="Aleatório de 192 bits">
+    XChaCha20-Poly1305: colisões desprezíveis, sem estado.
+  </Tab>
+  <Tab value="Resistente a mau uso">
+    AES-GCM-SIV ([RFC 8452](https://www.rfc-editor.org/rfc/rfc8452)): nonce repetido só revela se as mensagens são iguais.
+  </Tab>
+</Tabs>
+
+**Pergunta de projeto:** o sistema consegue garantir que o nonce nunca se repete, inclusive depois de falhas? Se não, escolhe-se uma das duas últimas opções.
+
+## Erros que ainda aparecem
+
+| Erro | Consequência |
+|------|--------------|
+| Usar ECB | Padrões visíveis; recorta e cola |
+| IV fixo ou previsível no CBC | Prefixos visíveis; BEAST |
+| CBC sem MAC, ou MAC antes de cifrar | Inversão de bits; oráculo de padding |
+| Nonce repetido em CTR ou ChaCha20 | Vaza o XOR das mensagens |
+| Nonce repetido em GCM | Falsificação de mensagens |
+| Comparar a etiqueta com igualdade comum | Vazamento por tempo de resposta |
+| Liberar texto claro antes de verificar | Integridade anulada |
+
+## Qual algoritmo escolher
+
+```
+Dados novos? Use AEAD.
+ ├─ Nonce único garantido?
+ │    ├─ Sim, com AES-NI  →  AES-GCM, IV de 96 bits por contador
+ │    └─ Sim, sem AES-NI  →  ChaCha20-Poly1305, nonce por contador
+ └─ Nonce único NÃO garantido
+      →  XChaCha20-Poly1305 (nonce aleatório de 192 bits) ou AES-GCM-SIV
+
+ECB, CBC e CTR sem autenticação: apenas por compatibilidade com sistemas antigos,
+e no caso de CBC e CTR sempre com MAC sobre o texto cifrado.
+```
+
+<Callout title="Aplicação no artigo" type="success">
+  A decisão "o que se mantém e o que se troca" é a de toda migração. No TLS 1.3, a camada de **dados** (AEAD) permanece, e só a **origem da chave** (X25519 para X25519MLKEM768) muda, o que torna a migração localizada e mensurável.
+</Callout>

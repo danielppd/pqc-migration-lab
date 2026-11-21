@@ -1,0 +1,48 @@
+---
+title: Garantias e suposições
+description: O que se protege, em que estado o dado está e em que se apoia cada esquema
+---
+
+Criptografia moderna é a ciência de construir **garantias verificáveis sob suposições explícitas** sobre o que um adversário consegue computar.
+
+## As quatro garantias
+
+| Garantia | Significado | Exemplos |
+|----------|-------------|----------|
+| Confidencialidade | Só quem tem a chave aprende algo sobre o conteúdo | AES-GCM, ML-KEM, TLS |
+| Integridade | Qualquer alteração é detectada | SHA-3, HMAC, AEAD |
+| Autenticidade | A origem é verificável por terceiros, mesmo sem segredo compartilhado | ML-DSA, Ed25519, X.509 |
+| Privacidade no uso | O dado é processado ou verificado sem ser revelado | ZK, MPC, FHE |
+
+## Os quatro estados do dado
+
+| Estado | Técnica | Situação (segundo o material da disciplina) |
+|--------|---------|------------------------------|
+| Em repouso | AES-256, gestão de chaves, HSM | Maduro há décadas |
+| **Em trânsito** | TLS 1.3, SSH, Signal, troca híbrida com ML-KEM | **Migração PQ em curso** |
+| Em uso | FHE, MPC, enclaves (TEE) | Produção em nichos |
+| Computação verificável | SNARKs, STARKs, zkVMs | Expansão acelerada |
+
+A pesquisa se situa na linha **em trânsito**.
+
+## Segurança é relativa a definição, modelo e suposição
+
+Um adversário A joga contra um desafiante: sorteia-se um bit b, A escolhe m0 e m1 e recebe `Enc(k, m_b)`. A vantagem é `Adv(A) = |Pr[b' = b] - 1/2| <= negl(λ)`. Variantes fixam o poder de A: **IND-CCA2 para KEMs**, **EUF-CMA para assinaturas**.
+
+"Seguro" significa seguro **em relação a uma definição, um modelo e uma suposição**. A maioria das quebras reais ataca o que ficou fora do modelo.
+
+## Em que cada esquema se apoia
+
+| Família | Problema base | Esquemas | Computador quântico |
+|---------|---------------|----------|---------------------|
+| Teoria dos números | Fatoração, log discreto | RSA, DH, ECDSA, Ed25519, X25519 | **Quebrado** (Shor) |
+| Reticulados | MLWE, MSIS, NTRU | ML-KEM, ML-DSA, FN-DSA | Resiste (conjectura) |
+| Códigos corretores | Decodificação | HQC, Classic McEliece | Resiste (conjectura) |
+| Funções de hash | Colisão e pré-imagem | SLH-DSA, XMSS, LMS | Resiste (Grover) |
+| Simétrica | Pseudoaleatoriedade | AES, ChaCha20, Ascon | Resiste (chave maior) |
+
+A diversidade é **deliberada**: se uma família cair, outra sustenta o ecossistema. Por isso o HQC (códigos) é reserva do ML-KEM (reticulados).
+
+<Callout title="Aplicação no artigo" type="success">
+  A tabela de famílias explica a motivação da pesquisa: a primeira linha deixa de ser segura diante de um computador quântico, e as conjecturas das demais são mais recentes, o que justifica a troca de chaves **híbrida**.
+</Callout>

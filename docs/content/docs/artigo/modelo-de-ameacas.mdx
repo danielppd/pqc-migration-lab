@@ -1,0 +1,28 @@
+---
+title: Modelo de ameaças
+description: Adversário, capacidades, recursos, objetivo e limites do modelo
+---
+
+Todo mecanismo de segurança é avaliado contra um modelo de ameaças: o que o adversário pode fazer, quanto ele computa, o que conta como quebra, e o que fica **fora** do modelo.
+
+| Pergunta | Definição adotada |
+|----------|-------------------|
+| Quem é o adversário? | Adversário quântico com um CRQC (que ainda não existe) e, no cenário que motiva a pesquisa, **passivo**: grava tráfego hoje e decifra depois (HNDL) |
+| Capacidades | Observa o canal público e captura handshakes. Não tem a chave de sessão nem acesso ao servidor ou ao cliente |
+| Recursos | Computação quântica tolerante a falhas no futuro. Hoje, clássica |
+| Objetivo | Recuperar a chave de sessão e, com ela, o conteúdo |
+| Fora do modelo | Implementação (canais laterais), gestão de chaves, autenticação e segurança de aplicação |
+
+## Papel do modelo numa pesquisa de medição
+
+<Callout type="warn" title="O artigo mede custo, não testa segurança">
+  O modelo de ameaças justifica **por que** a troca de chaves migra antes (Mosca: `x + y > z`) e **o que** o híbrido precisa proteger. A segurança do ML-KEM é **assumida** do FIPS 203.
+</Callout>
+
+## Teoria de base
+
+<Cards>
+  <Card title="Modelo de ameaça" href="/docs/aulas/aula-02-criptografia-simetrica-1/fundamentos/modelo-de-ameaca" />
+  <Card title="Capacidades (COA a CCA)" href="/docs/aulas/aula-02-criptografia-simetrica-1/fundamentos/capacidades" />
+  <Card title="A ameaça quântica" href="/docs/aulas/aula-01-criptografia-moderna/ameaca-quantica" />
+</Cards>

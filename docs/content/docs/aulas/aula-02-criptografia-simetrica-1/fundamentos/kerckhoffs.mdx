@@ -1,0 +1,32 @@
+---
+title: Princípio de Kerckhoffs
+description: O algoritmo é público, só a chave é secreta
+---
+
+> O sistema não deve exigir segredo e pode cair nas mãos do inimigo sem inconveniente. (Auguste Kerckhoffs, 1883, tradução livre)
+
+## Por que manter só a chave em segredo
+
+1. **Chave é curta e fácil de trocar.** Um algoritmo comprometido exige reescrever o sistema inteiro.
+2. **Algoritmo público recebe escrutínio** de muitos analistas.
+3. **Padronização** permite interoperabilidade e implementações auditáveis. Se Alice e Bob não concordam no algoritmo, a comunicação não funciona.
+
+"Segurança por obscuridade" pode atrasar o atacante, mas não pode ser a base da segurança.
+
+## Quando o algoritmo era secreto
+
+| Sistema | O que aconteceu |
+|---------|-----------------|
+| CSS (DVD) | Revertido e quebrado em 1999 |
+| A5/1 (GSM) | Revertido em 1999, ataques práticos em seguida |
+| Crypto1 (MIFARE Classic) | Revertido e quebrado em 2008 |
+
+<Video id="lkWNooQ6oaM" title="Definitions, Kerckhoff's Principle" meta="UC Berkeley CS 161, 8 min, inglês" />
+
+## O caso do DES
+
+O DES é aberto, mas os **parâmetros** das S-boxes foram fixados sem explicação. Isso alimentou a suspeita de backdoor da NSA. Em 1994 soube-se que a alteração protegia contra um ataque que a IBM já conhecia (ver a seção DES).
+
+<Callout title="Aplicação no artigo" type="success">
+  A pesquisa usa algoritmos **públicos e padronizados** (ML-KEM, FIPS 203, e X25519). Por Kerckhoffs, qualquer pessoa reproduz a medição, porque nada é secreto.
+</Callout>

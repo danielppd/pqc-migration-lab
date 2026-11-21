@@ -1,0 +1,52 @@
+---
+title: Exercícios resolvidos
+description: Os nove exercícios da Aula 4, com resolução
+---
+
+<Callout title="Formato">
+  Cada resolução está recolhida num acordeão, para que o exercício possa ser resolvido antes da conferência.
+</Callout>
+
+<Accordions>
+  <Accordion title="1. Padding">
+    **a)** Uma mensagem de 13 bytes precisa de 3 bytes de padding, então o bloco final é a mensagem seguida de `03 03 03`.
+
+    **b)** `... 03 03 03`: **válido** (o último byte é 03 e os 3 finais valem 03). `... 04 04 03`: **inválido** (o último byte é 03, mas os 3 finais não são todos 03). `... 00`: **inválido** (o byte de padding nunca é 00).
+  </Accordion>
+  <Accordion title="2. O que o ECB entrega">
+    `C1 = C3` implica `P1 = P3` (blocos iguais em ECB vêm de blocos de texto claro iguais): o atacante aprende que os blocos 1 e 3 da mensagem são iguais. Com outra chave, os **valores** dos ciphertexts mudam, mas a **igualdade** entre blocos permanece, como nas imagens cifradas com chaves diferentes (as cores mudam, o desenho não).
+  </Accordion>
+  <Accordion title="3. Propagação de erros no CBC">
+    Com `Pi = DK(Ci) XOR C(i-1)`: o bit invertido em `C2` destrói **`P2`** inteiro (a entrada de `DK` muda, e a saída parece aleatória) e inverte **exatamente o mesmo bit em `P3`** (`C2` entra no XOR de `P3`). **`P4` não é afetado**, porque depende de `C3` e `C4`.
+  </Accordion>
+  <Accordion title="4. Inversão de bits dirigida">
+    O caractere está no byte 15 do bloco 2. De `7` (`0x37`) para `1` (`0x31`): `Δ = 0x37 XOR 0x31 = 0x06`. Aplica-se `XOR 06` ao **byte 15 do primeiro bloco cifrado** (o bloco anterior). O bloco 2 passa a terminar em `id=1`, e o bloco 1 é destruído (vira lixo).
+  </Accordion>
+  <Accordion title="5. Reuso de nonce em CTR">
+    `P2 = C1 XOR C2 XOR P1`. Com `C1 XOR C2 = 13 11 02 16 00 00` e `P1 = ATACAR` (`41 54 41 43 41 52`): `52 45 43 55 41 52`, ou seja **`RECUAR`**.
+  </Accordion>
+  <Accordion title="6. GHASH com mais blocos">
+    Cada passo faz `X = (X XOR bloco) · H`, em sequência sobre `A`, `C1`, `C2` e `L`:
+
+    ```
+    X1 = A·H
+    X2 = (X1 XOR C1)·H
+    X3 = (X2 XOR C2)·H
+    S  = (X3 XOR L)·H
+       = A·H^4 XOR C1·H^3 XOR C2·H^2 XOR L·H
+    ```
+
+    em que `L` é o bloco com os comprimentos de `A` e de `C`, em bits.
+  </Accordion>
+  <Accordion title="7. O ataque com nonce repetido">
+    Os valores recuperados são `H = EK(0^128)` e `EK(J0)`. O primeiro depende **só da chave**. O segundo depende da chave **e do IV**, porque `J0 = IV ǁ 0...01`. Para o IV repetido, o atacante tem `H` e `EK(J0)`, logo calcula qualquer etiqueta. Para outro IV, `EK(J0')` é desconhecido, então a máscara da etiqueta não pode ser calculada e a falsificação falha.
+  </Accordion>
+  <Accordion title="8. Nonces aleatórios de 96 bits">
+    Com `q = 2^32`: `q^2 / 2^97 = 2^64 / 2^97 = 2^-33`, cerca de `1,2 * 10^-10`. O limite de `2^32` cifrações por chave do NIST mantém a probabilidade de colisão no patamar de `2^-32` ou menos. Passar desse limite faz a probabilidade crescer com o quadrado de `q`.
+  </Accordion>
+  <Accordion title="9. Projeto: sensor sem AES-NI">
+    **Cenário:** uma leitura por segundo durante anos, reinício por falta de energia, pouca escrita em memória não volátil. **O risco principal é o reinício**: um contador em RAM voltaria a zero e repetiria nonces.
+
+    **Escolha:** ChaCha20-Poly1305 (tempo constante sem tabelas e sem instruções de AES), com nonce de 192 bits aleatório (**XChaCha20-Poly1305**). Sem estado, colisões desprezíveis, sem depender da memória não volátil. Alternativa: contador salvo em memória não volátil em passos grandes (reservando uma faixa por reinício), ao custo de gravações e de estado a proteger. A fonte de aleatoriedade na inicialização precisa ser de qualidade.
+  </Accordion>
+</Accordions>

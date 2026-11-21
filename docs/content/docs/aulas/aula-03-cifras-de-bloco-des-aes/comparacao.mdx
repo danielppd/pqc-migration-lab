@@ -1,0 +1,59 @@
+---
+title: DES, 3DES e AES lado a lado
+description: Comparação direta, as quatro camadas do ideal ao operacional e o orçamento de uso
+---
+
+## Comparação
+
+| | DES | 3DES | AES-128 |
+|---|-----|------|---------|
+| Ano | 1977 | 1999 (FIPS 46-3) | 2001 |
+| Estrutura | Feistel, 16 rodadas | 3 x DES, 48 rodadas | SPN, 10 rodadas |
+| Bloco | 64 bits | 64 bits | 128 bits |
+| Chave efetiva | 56 bits | 168 bits (cerca de 112 de segurança) | 128 bits |
+| Melhor ataque prático | Força bruta (horas) | Nenhum de recuperação de chave; Sweet32 explora o bloco | Nenhum; biclique reduz a busca a cerca de `2^126` |
+| Software | Lento (bits) | Três vezes mais lento | Rápido; com AES-NI, gigabytes por segundo por núcleo |
+| Situação | Obsoleto | Proibido para cifrar desde 2024 | Padrão atual |
+
+## Do ideal ao operacional, em quatro camadas
+
+```
+One-Time Pad  →  Cifra de bloco (AES)  →  Modo de operação  →  Cifração autenticada
+ perfeita;        permutação              mensagens de         sigilo e integridade
+ chave do         pseudoaleatória;        qualquer tamanho;    (AES-GCM)
+ tamanho da       chave de 128 bits       segurança CPA
+ mensagem
+```
+
+| O que se cede | O que se ganha |
+|---------------|----------------|
+| Segurança perfeita vira computacional; aparece um limite de uso por chave; a segurança passa a depender de uma suposição sobre a cifra | Chave curta e reutilizável, desempenho de gigabytes por segundo, integridade e uma única primitiva auditada por décadas |
+
+## Orçamento de uso: o tamanho do bloco manda
+
+| | Bloco de 64 bits | Bloco de 128 bits |
+|---|------------------|-------------------|
+| Colisões prováveis após | `2^32` blocos | `2^64` blocos |
+| Em volume de dados | Cerca de 32 GB | Cerca de 256 EiB |
+| Limite do NIST para 3DES | `2^20` blocos (8 MB) por chave | n/a |
+| Exemplos | DES, 3DES, Blowfish | AES, Camellia |
+
+**Leitura operacional:** segurança computacional vem com **orçamento**: quantos blocos, quantas mensagens, por quanto tempo uma chave pode ser usada. O bloco de 128 bits do AES transformou esse orçamento de "alguns gigabytes" em "mais do que qualquer sistema cifra".
+
+## Uma cifra de bloco sozinha não basta
+
+| Modo | Características |
+|------|-----------------|
+| **ECB: uso ingênuo** | Cifrar cada bloco com `AES_k`. Determinístico: blocos iguais viram blocos iguais, e padrões da imagem ou do arquivo aparecem |
+| **Modos com aleatoriedade (CTR, CBC)** | Usam nonce ou vetor de inicialização: a mesma mensagem gera ciphertexts diferentes. Necessário para segurança CPA |
+| **Modos autenticados (GCM etc.)** | Combinam cifração e autenticação. É o que o TLS 1.3 usa com o AES |
+
+A cifra de bloco é a peça, e o modo de operação é o esquema de cifração. Os modos são o assunto da Aula 4.
+
+<Cards>
+  <Card title="Aula 4: modos de operação e AEAD" href="/docs/aulas/aula-04-modos-de-operacao-e-aead" />
+</Cards>
+
+<Callout title="Aplicação no artigo" type="success">
+  O raciocínio de **orçamento de uso** (quantos blocos por chave) é o mesmo que o NIST aplica ao AES-GCM com nonces aleatórios (Aula 4), e a lógica "o parâmetro que envelhece" volta na análise dos tamanhos do ML-KEM.
+</Callout>

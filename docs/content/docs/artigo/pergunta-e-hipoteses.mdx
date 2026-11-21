@@ -1,0 +1,38 @@
+---
+title: Pergunta e hipóteses
+description: A pergunta de pesquisa e as hipóteses testáveis
+---
+
+## Pergunta de pesquisa
+
+> Quanto custa, em bytes e em tempo de handshake, trocar X25519 por X25519MLKEM768 no TLS 1.3, e em que condições de rede (RTT, perda de pacotes, MTU) esse custo deixa de ser desprezível?
+
+## Hipóteses
+
+<Tabs items={['H1 bytes', 'H2 CPU', 'H3 rede']}>
+  <Tab value="H1 bytes">
+    O custo em bytes vem quase todo dos key shares, é fixo (cerca de +1,2 KB no ClientHello e +1,1 KB no ServerHello) e **independe do certificado**.
+
+    **Refutada se** o aumento variar com o tamanho do certificado.
+  </Tab>
+  <Tab value="H2 CPU">
+    O custo de **CPU** do handshake híbrido é pequeno frente a qualquer RTT realista: diferença de mediana abaixo de 1 ms em loopback.
+
+    O limiar de 1 ms é uma estimativa inicial, a ser calibrada com a literatura de desempenho do ML-KEM. **Refutada se** a diferença de mediana ultrapassar 1 ms.
+  </Tab>
+  <Tab value="H3 rede">
+    Em rede sem perda, o híbrido **não adiciona RTT**, porque o voo do servidor cabe na janela inicial de congestionamento do TCP (10 segmentos, [RFC 6928](https://www.rfc-editor.org/rfc/rfc6928)). A penalidade só aparece com perda ou MTU reduzida (por exemplo 1280).
+
+    **Refutada se** o híbrido adicionar RTT com 0% de perda e MTU 1500.
+  </Tab>
+</Tabs>
+
+<Callout type="warn" title="Ordem de formulação">
+  O experimento de bytes (H1) foi **exploratório** e antecedeu a formulação das hipóteses: H1 nasceu dessa medição. H2 e H3 foram escritas antes de serem testadas.
+</Callout>
+
+## Critérios para uma boa hipótese
+
+1. É possível dizer qual número a refutaria.
+2. Se estiver errada, algo se aprende.
+3. Está ligada a uma decisão de engenharia (onde o híbrido cabe).

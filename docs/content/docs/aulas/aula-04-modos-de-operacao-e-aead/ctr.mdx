@@ -1,0 +1,58 @@
+---
+title: CTR, transformando a cifra de bloco em fluxo
+description: A cifra de bloco gera um fluxo de chave a partir de um contador, e o texto é cifrado com XOR
+---
+
+**Counter mode.** Um One-Time Pad em que o bloco aleatório é trocado pela saída do AES sobre entradas que nunca se repetem.
+
+```
+Fluxo de chave:   Si = EK(N ǁ i)       (N = nonce, i = contador)
+Cifrar:           Ci = Pi XOR Si
+Decifrar:         Pi = Ci XOR Si       (a mesma operação)
+```
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/4/4d/CTR_encryption_2.svg"
+  alt="Diagrama do modo CTR na cifração"
+  caption="CTR: o AES cifra blocos de contador, e a saída é combinada por XOR com o texto claro."
+  credit="WhiteTimberwolf, Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:CTR_encryption_2.svg"
+/>
+
+## Como funciona na prática
+
+- **Bloco de contador** = nonce ǁ contador. Com nonce de 8 bytes e contador de 8 bytes, são 16 bytes.
+- Para uma mensagem de 27 bytes: **2 blocos de fluxo**, usando 16 mais 11 bytes. Os 5 bytes finais do fluxo são descartados, e **não há padding**.
+- O contador cresce dentro da mensagem, e o nonce muda entre mensagens.
+- O texto cifrado tem 27 bytes, igual ao tamanho da mensagem.
+- Na decifração, o receptor recalcula o fluxo com a mesma chave e o mesmo nonce: `(P XOR S) XOR S = P`. **A decifração do AES nunca é usada.**
+
+## Vetor de teste do NIST
+
+[SP 800-38A](https://csrc.nist.gov/pubs/sp/800/38/a/final), F.5.1, chave `2b7e1516 28aed2a6 abf71588 09cf4f3c`:
+
+| Etapa | Valor |
+|-------|-------|
+| Bloco de contador 1 | `f0f1f2f3 f4f5f6f7 f8f9fafb fcfdfeff` |
+| `P1` | `6bc1bee2 2e409f96 e93d7e11 7393172a` |
+| `C1 = P1 XOR EK(contador)` | `874d6191 b620e326 1bef6864 990db6ce` |
+
+Primeiro byte: `6b XOR ec = 87`. O AES só cifrou contadores, e o texto claro nunca entrou nele. (O vetor foi reproduzido com o OpenSSL em modo `aes-128-ctr`.)
+
+## Propriedades
+
+| Propriedade | CTR |
+|-------------|-----|
+| Cifração e decifração | Paralelas |
+| Acesso direto a um bloco | Sim |
+| Padding | Desnecessário |
+| Usa a decifração do AES | Não |
+| 1 bit errado em `Ci` | Inverte exatamente 1 bit de `Pi` |
+
+Na imagem da aula, os mesmos 60 bits alterados mudam só 60 pixels, contra 418 no CBC. É por isso que o CTR é a base do AES-GCM, e o mesmo princípio está no ChaCha20.
+
+<Video id="Rk0NIQfEXBA" title="Modes of Operation" meta="Computerphile, 14 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="info">
+  O CTR é a parte de **sigilo** do AES-GCM, usado pelo TLS 1.3. A ideia de "cifra de bloco como gerador de fluxo" é a ponte entre a cifra de bloco (Aula 3) e a cifração autenticada (restante da Aula 4).
+</Callout>

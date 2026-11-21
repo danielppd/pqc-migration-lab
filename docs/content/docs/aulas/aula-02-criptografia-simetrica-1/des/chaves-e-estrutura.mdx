@@ -1,0 +1,42 @@
+---
+title: Agenda de chaves e propriedades estruturais
+description: De onde vêm as 16 subchaves, avalanche, complementação e chaves fracas
+---
+
+## Agenda de chaves
+
+<Steps>
+  <Step>A chave de 64 bits passa por **PC-1**, que descarta a paridade e deixa 56 bits.</Step>
+  <Step>Os 56 bits viram duas metades, C e D, de 28 bits.</Step>
+  <Step>Em cada rodada, as duas metades giram à esquerda 1 ou 2 posições.</Step>
+  <Step>**PC-2** seleciona 48 bits e produz a subchave da rodada.</Step>
+</Steps>
+
+Rotações por rodada: `1 1 2 2 2 2 2 2 1 2 2 2 2 2 2 1`. Somam 28, então depois da rodada 16 as metades voltam ao início. Cada bit de chave aparece em 12 a 15 das 16 subchaves. Para decifrar, giram-se as metades para a direita, gerando `K16` até `K1`.
+
+## Efeito avalanche
+
+Um bit alterado na entrada vira, em média, cerca de **32 bits diferentes** por volta da 5ª rodada (metade do bloco). Alterar um bit da chave produz o mesmo efeito. As rodadas restantes são **margem**: os ataques analíticos exploram as rodadas iniciais, quando a difusão ainda é incompleta.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/6/6a/DES-main-network.png"
+  alt="Rede principal do DES com as 16 rodadas"
+  caption="Rede principal do DES: as 16 rodadas de Feistel, cada uma com sua subchave."
+  credit="Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:DES-main-network.png"
+/>
+
+## Propriedades estruturais conhecidas
+
+<Accordions type="single">
+  <Accordion title="Complementação">
+    `DES(complemento de k, complemento de m) = complemento de DES(k, m)`. Se o atacante obtém a cifração de m e do seu complemento (texto escolhido), cada teste de chave elimina k e seu complemento de uma vez, e a busca cai de `2^56` para `2^55`.
+  </Accordion>
+  <Accordion title="Chaves fracas e semifracas">
+    4 chaves fracas (todas as subchaves iguais, cifrar duas vezes devolve o texto claro) e 6 pares semifracos (uma chave do par decifra o que a outra cifra). São poucas entre `2^56`, e implementações cuidadosas as rejeitam. Toda estrutura não aleatória é um alvo potencial.
+  </Accordion>
+</Accordions>
+
+<Callout title="Aplicação no artigo" type="info">
+  "Toda estrutura não aleatória é um alvo potencial" é o mesmo alerta da Aula 1 sobre o ataque ao HAWK em 2026: uma simetria não usada no reticulado foi explorada. Esquemas jovens com muita estrutura algébrica ficam mais expostos.
+</Callout>

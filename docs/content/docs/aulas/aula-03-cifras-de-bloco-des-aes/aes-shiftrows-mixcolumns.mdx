@@ -1,0 +1,79 @@
+---
+title: ShiftRows e MixColumns
+description: As duas camadas lineares de difusão do AES
+---
+
+## ShiftRows: cada coluna vai para quatro colunas
+
+Cada linha do estado é deslocada ciclicamente para a esquerda: a linha 0 desloca 0, a linha 1 desloca 1, a linha 2 desloca 2 e a linha 3 desloca 3.
+
+```
+Antes             Depois
+a0 a1 a2 a3       a0 a1 a2 a3     (desloca 0)
+b0 b1 b2 b3       b1 b2 b3 b0     (desloca 1)
+c0 c1 c2 c3       c2 c3 c0 c1     (desloca 2)
+d0 d1 d2 d3       d3 d0 d1 d2     (desloca 3)
+```
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/6/66/AES-ShiftRows.svg"
+  alt="Diagrama do ShiftRows do AES"
+  caption="ShiftRows: as linhas do estado são deslocadas ciclicamente em 0, 1, 2 e 3 posições."
+  credit="Matt Crypto, Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:AES-ShiftRows.svg"
+/>
+
+| | Sem ShiftRows | Com ShiftRows |
+|---|---------------|---------------|
+| Efeito | O AES viraria quatro cifras independentes de 32 bits, uma por coluna | Na rodada seguinte, cada coluna recebe um byte de cada coluna anterior |
+| Custo | n/a | Zero em hardware, só fios |
+
+## MixColumns: uma matriz sobre GF(2^8)
+
+Cada coluna é multiplicada por uma matriz fixa:
+
+```
+02 03 01 01     db      8e
+01 02 03 01  ·  13   =  4d
+01 01 02 03     53      a1
+03 01 01 02     45      bc
+```
+
+Cada byte de saída depende dos quatro bytes da coluna, e alterar um byte de entrada altera os quatro de saída.
+
+**Primeiro byte de saída:** `{02}·{db} XOR {03}·{13} XOR {53} XOR {45} = ad XOR 35 XOR 53 XOR 45 = 8e`.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/7/76/AES-MixColumns.svg"
+  alt="Diagrama do MixColumns do AES"
+  caption="MixColumns: cada coluna do estado é multiplicada por uma matriz fixa em GF(2^8)."
+  credit="Matt Crypto, Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:AES-MixColumns.svg"
+/>
+
+É linear e invertível: a decifração usa a matriz inversa, e a análise de difusão vira álgebra linear sobre o corpo.
+
+## Por que justamente esses coeficientes
+
+**Número de ramificação 5.** Para toda coluna de entrada não nula, vale:
+
+```
+bytes ativos na entrada + bytes ativos na saída ≥ 5
+```
+
+É o máximo possível para uma matriz 4 por 4 (matriz MDS).
+
+| Bytes ativos na entrada | Bytes ativos na saída, no mínimo |
+|-------------------------|----------------------------------|
+| 1 | 4 |
+| 2 | 3 |
+| 3 | 2 |
+| 4 | 1 |
+
+**Coeficientes baratos:** `01` não faz nada, `02` é um `xtime`, `03` é um `xtime` e um XOR. A cifração usa só essas três operações.
+
+**O preço na decifração:** a inversa usa `0e 0b 0d 09`, com mais `xtime` por byte, o que torna a decifração mais lenta. A troca é aceita porque os modos CTR e GCM só usam a cifração.
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. O conceito de **número de ramificação** (garantia de difusão por construção) ilustra como um projeto pode transformar uma propriedade desejada em um argumento demonstrável, em vez de uma esperança empírica.
+</Callout>

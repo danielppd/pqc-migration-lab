@@ -1,0 +1,39 @@
+---
+title: Ciclo de vida de uma primitiva
+description: Como algoritmos nascem, são quebrados e morrem, e por que migrar é lento
+---
+
+```
+Proposta pública → Criptoanálise → Padronização → Implementação → Implantação → Depreciação
+```
+
+## Casos citados na Aula 1 (datas segundo o material da aula)
+
+| Primitiva | Quando caiu | Lição |
+|-----------|-------------|-------|
+| SHA-1 | Colisão teórica em 2005, prática em 2017 (SHAttered) | **Doze anos entre o alerta e a quebra pública**, e muitos sistemas ainda não tinham migrado |
+| Rainbow | Chave recuperada em um fim de semana num notebook (2022) | Finalista NIST caiu depois de anos de análise |
+| SIKE | Ataque clássico em cerca de 1 hora (2022) | Esquema na quarta rodada NIST, quebrado por matemática nova, não por força bruta |
+| HAWK | Candidato retirado em 29/07/2026 | Simetria inexplorada no reticulado, encontrada com apoio de modelo de linguagem |
+
+Junte com o caso da Aula 2: o **3DES** foi permitido até 2023 e ainda é usado.
+
+## O padrão
+
+<Callout title="Migrações criptográficas são lentas, e a lentidão é o problema">
+  O alerta vem anos antes da quebra, e mesmo assim sistemas continuam presos ao algoritmo antigo. Isso transforma a migração em **problema de engenharia**: o difícil não é descobrir o algoritmo novo, é trocar o antigo em milhares de lugares.
+</Callout>
+
+## Lições de método
+
+- **Kerckhoffs na prática:** os algoritmos que sobrevivem são os que foram atacados em público.
+- **Diversidade de suposições** protege o ecossistema (por isso o NIST padronizou mais de uma família).
+- **Esquemas jovens e com muita estrutura algébrica** ficam mais expostos a buscas sistemáticas, hoje assistidas por modelos de linguagem.
+
+<Callout type="warn" title="Datas de 2026">
+  Os eventos de 2026 citados provêm do material da Aula 1 e devem ser conferidos nas fontes primárias antes de qualquer citação (por exemplo, o anúncio no fórum pqc-forum do NIST).
+</Callout>
+
+<Callout title="Aplicação no artigo" type="success">
+  SHA-1 e 3DES servem de precedente na introdução do artigo: migrar costuma atrasar, o que fundamenta medir o custo da migração antes da quebra.
+</Callout>

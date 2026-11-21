@@ -1,0 +1,46 @@
+---
+title: "Confidencialidade não basta: CCA e composição com MAC"
+description: ECB, CBC e CTR lado a lado, o atacante ativo e as três formas de juntar cifra e MAC
+---
+
+## ECB, CBC e CTR lado a lado
+
+| | ECB | CBC | CTR |
+|---|-----|-----|-----|
+| Ingrediente por mensagem | Nenhum | IV aleatório e imprevisível | Nonce único |
+| CPA seguro | Não | Sim, com IV correto | Sim, com nonce único |
+| Paralelismo | Total | Só na decifração | Total |
+| Padding | Sim | Sim | Não |
+| Erro de 1 bit | 1 bloco destruído | 1 bloco destruído e 1 bit invertido | 1 bit invertido |
+| Se o ingrediente falha | Já nasce falho | Vaza prefixos; BEAST | Vaza o XOR das mensagens |
+| Atacante que altera o texto | Recorta e cola | Inversão de bits; oráculo de padding | Inversão de bits exata |
+
+**Nenhum dos três detecta alteração.** Confidencialidade e integridade são garantias diferentes, e a segunda não vem de graça.
+
+## O atacante ativo: segurança CCA
+
+Igual ao CPA, mais um **oráculo de decifração**: o adversário pede `Dec(k, c)` para qualquer `c` diferente do desafio.
+
+**A saída: integridade.** Se o atacante não consegue produzir nenhum texto cifrado válido novo, o oráculo de decifração só responde "inválido" e não ensina nada:
+
+```
+CPA + integridade do texto cifrado  ⇒  CCA
+```
+
+**Por que o CTR cai:** o adversário pede a decifração de `c*` com o primeiro bit invertido. A resposta é `m_b` com o primeiro bit invertido. Desfaz-se a inversão e sabe-se `b`.
+
+## Três formas de juntar cifra e MAC
+
+| Composição | Envia | Onde aparece | Resultado |
+|------------|-------|--------------|-----------|
+| Cifrar e autenticar | `Enc(m), MAC(m)` | SSH original | O MAC pode vazar `m`; sem garantia |
+| Autenticar e depois cifrar | `Enc(m ǁ MAC(m))` | SSL e TLS até 1.2 | Decifra antes de verificar: oráculos |
+| **Cifrar e depois autenticar** | `c = Enc(m), MAC(c)` | IPsec ESP, recomendada | Genericamente segura (CCA) |
+
+**A regra que sai daí:** verifique antes de decifrar. Nenhum byte de texto claro, nenhuma mensagem de erro diferente, antes de a autenticação passar.
+
+**O problema prático:** duas chaves, dois algoritmos, ordem certa, comparação em tempo constante: muitos pontos para errar. Daí a ideia de uma **primitiva única**, o AEAD.
+
+<Callout title="Aplicação no artigo" type="success">
+  A mesma lógica explica por que, na migração pós-quântica, **o KEM precisa ser IND-CCA2** (Aula 1): um KEM sem integridade do ciphertext seria vulnerável aos análogos do oráculo de padding. O ML-KEM obtém CCA2 pela transformação Fujisaki-Okamoto.
+</Callout>

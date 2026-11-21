@@ -1,0 +1,46 @@
+---
+title: Aula 2, criptografia simétrica 1
+description: Paradigma de chave secreta, segurança perfeita e computacional, e o DES
+---
+
+**Tema:** paradigma de chave secreta, segurança perfeita e computacional, e o DES em detalhe. Aula de 17/11/2026.
+
+**Pergunta central da aula:** o que significa, com precisão, dizer que uma cifra é segura?
+
+## Objetivos
+
+1. Descrever um esquema de chave secreta pela tripla (Gen, Enc, Dec) e enunciar a condição de correção.
+2. Separar capacidades, recursos e objetivo de um adversário.
+3. Enunciar a segurança perfeita de Shannon e prová-la para o One-Time Pad.
+4. Explicar por que a segurança perfeita exige chaves tão longas quanto as mensagens.
+5. Justificar os dois relaxamentos da segurança computacional e reconhecer funções desprezíveis.
+6. Descrever o DES em cada componente e relacionar seus ataques ao modelo de ameaça.
+7. Avaliar uma cifra pelo modelo de ameaça, e não pela aparência do ciphertext.
+
+## Percurso
+
+<Steps>
+  <Step>
+    ### Fundamentos
+    O paradigma, o princípio de Kerckhoffs e o modelo de ameaça (capacidades, objetivo e recursos).
+  </Step>
+  <Step>
+    ### Segurança perfeita
+    A definição de Shannon, o One-Time Pad, seus quatro limites e o teorema que prova que o limite é inevitável.
+  </Step>
+  <Step>
+    ### Segurança computacional
+    Os dois relaxamentos, a função desprezível e a escala de 2^n.
+  </Step>
+  <Step>
+    ### DES
+    Contexto, rede de Feistel, função f, agenda de chaves, ataques e a transição para o 3DES.
+  </Step>
+</Steps>
+
+**Leitura de apoio da aula:** Katz e Lindell, *Introduction to Modern Cryptography* (3ª ed.), capítulos 1, 2 e 3.1; Shannon (1949).
+
+<Cards>
+  <Card title="Primeira página: o paradigma" href="/docs/aulas/aula-02-criptografia-simetrica-1/fundamentos/paradigma" />
+  <Card title="Exercícios resolvidos" href="/docs/aulas/aula-02-criptografia-simetrica-1/exercicios" />
+</Cards>

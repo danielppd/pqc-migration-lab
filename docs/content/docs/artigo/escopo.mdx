@@ -1,0 +1,30 @@
+---
+title: Escopo
+description: O que está dentro, o que está fora e por quê
+---
+
+| Dentro | Fora |
+|--------|------|
+| Troca de chaves no handshake TLS 1.3: X25519 (base), X25519MLKEM768 (implantada), MLKEM768 puro e SecP256r1MLKEM768 (variações) | **Autenticação** (certificados e assinaturas), mantida clássica com ECDSA P-256 |
+| Custo em bytes de handshake | Segurança do próprio ML-KEM, assumida do FIPS 203 |
+| Custo de tempo: CPU em loopback e latência sob RTT, perda e MTU emulados | Ataques de implementação e canais laterais (KyberSlash etc.) |
+| Uma biblioteca de referência (OpenSSL 3.6.4) | Navegadores, internet real e middleboxes reais |
+| Servidor e cliente em máquina controlada | Dispositivos restritos, IoT e blockchain |
+
+## Por que a autenticação fica fora
+
+A Aula 1 estabelece que a **confidencialidade migra primeiro**, por causa do HNDL, e que a autenticação só precisa resistir ao adversário quântico no momento da conexão. Ver [A ameaça quântica](/docs/aulas/aula-01-criptografia-moderna/ameaca-quantica).
+
+## Por que uma biblioteca só
+
+Misturar bibliotecas (OpenSSL, Go, BoringSSL) multiplica variáveis. Uma biblioteca de referência com versão fixa permite comparações limpas. A escolha é registrada como **limitação**, e outras bibliotecas ficam como trabalho futuro.
+
+## Evidência externa para o que fica fora
+
+Falhas de middleboxes com ClientHello grande não são reproduzíveis em laboratório. A pesquisa recorre à medição da Cloudflare (cerca de 0,34% das origens falharam, segundo o material da disciplina) em vez de tentar reproduzi-la:
+
+- [Automatic Key Exchange (Cloudflare)](https://blog.cloudflare.com/automatic-key-exchange-for-origins/)
+
+<Callout title="Princípio de escopo">
+  Escopo pequeno e bem medido é preferível a escopo amplo e frágil. Certificados, ML-DSA e navegadores ficam como **trabalho futuro**.
+</Callout>

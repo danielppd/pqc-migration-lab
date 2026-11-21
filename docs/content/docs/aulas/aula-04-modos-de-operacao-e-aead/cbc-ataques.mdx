@@ -1,0 +1,55 @@
+---
+title: "Ataques ao CBC: BEAST, inversão de bits e oráculo de padding"
+description: Três ataques reais que exploram o XOR da decifração e o padding
+---
+
+Na decifração, `Pi = DK(Ci) XOR C(i-1)`: o texto claro depende do bloco cifrado anterior por um **XOR simples**. É daí que saem os ataques.
+
+## BEAST: IV previsível (TLS 1.0)
+
+O erro do TLS 1.0: o IV de cada registro era o **último bloco cifrado do registro anterior**, e o atacante conhece o IV antes da cifração.
+
+<Steps>
+  <Step>Um script no navegador da vítima alinha o cookie de forma que só **um byte** seja desconhecido por bloco: no máximo 256 palpites por byte.</Step>
+  <Step>Para testar o palpite G, o atacante faz cifrar `P* = G XOR C(i-1)`, escolhido com o IV conhecido.</Step>
+  <Step>O AES recebe `G XOR C(i-1)`, e a saída é igual a `Ci` **se e somente se `G = Pi`**.</Step>
+  <Step>Byte a byte, o cookie é recuperado (Duong e Rizzo, 2011). **Correção:** IV aleatório e imprevisível em cada registro (TLS 1.1 em diante).</Step>
+</Steps>
+
+## Inversão de bits: alterar o texto sem a chave
+
+Alterar `C(i-1)` por `Δ` altera `Pi` **exatamente por `Δ`**, ao custo de destruir o bloco `P(i-1)`.
+
+Exemplo: o cookie `usuario=bruno123` seguido de `admin=false;id=7`. O atacante calcula `Δ = alvo XOR original` nos bytes de `false` e aplica em `C1`. O bloco 2 decifra como `admin=true;;id=7`, e o bloco 1 vira lixo. **Sem integridade, o CBC é maleável.**
+
+<Video id="VR-TuXXi3A8" title="AES CBC bit flipping attack" meta="MemoryCorruption, 10 min, inglês" />
+
+## Oráculo de padding
+
+O servidor decifra, confere o padding e responde **válido ou inválido** (por mensagem de erro ou por tempo de resposta). Só isso basta.
+
+**O ataque ao último byte:**
+
+<Steps>
+  <Step>Enviar `(C''0, C1)`, variando o último byte `g` de `C''0`.</Step>
+  <Step>O servidor calcula `DK(C1) XOR C''0`.</Step>
+  <Step>O padding é válido quando o último byte vale `01`.</Step>
+  <Step>Então `DK(C1)[15] = g XOR 01`, e `P[15] = g XOR 01 XOR C0[15]`.</Step>
+</Steps>
+
+Nenhuma chave é usada: o servidor decifra para o atacante, **um bit de resposta por vez**. Depois ajusta-se o último byte para valer `02` e ataca-se o penúltimo, e assim por diante: no máximo 256 tentativas por byte.
+
+**Em números:** 16 bytes recuperados com 1.953 consultas, cerca de 128 por byte, em média. Exemplo do último byte: padding válido com `g = aa` dá `DK(C1)[15] = aa XOR 01 = ab`.
+
+| Ataque real | Ano | Oráculo |
+|-------------|-----|---------|
+| Lucky Thirteen | 2013 | O tempo de resposta do TLS |
+| POODLE | 2014 | Oráculo de padding no SSL 3.0 |
+
+<Video id="LDL4O2ySi5U" title="Padding Oracle Attack" meta="Justin Yen, 10 min, inglês" />
+
+Descrição geral do ataque: [Padding oracle attack (Wikipedia)](https://en.wikipedia.org/wiki/Padding_oracle_attack).
+
+<Callout title="Aplicação no artigo" type="success">
+  Os três ataques têm a mesma raiz: o atacante influencia o que é decifrado e observa uma reação. É o padrão de **segurança contra texto cifrado escolhido (CCA)**, e a motivação para o TLS 1.3 aceitar apenas AEAD, onde qualquer alteração faz a decifração falhar de modo uniforme.
+</Callout>

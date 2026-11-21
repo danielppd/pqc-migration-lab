@@ -1,0 +1,41 @@
+---
+title: Adoção real e o caso brasileiro
+description: O que já está em produção, o que está atrasado e o que acontece no Brasil
+---
+
+## Em produção (segundo o material da disciplina, até nov/2026)
+
+| Onde | O quê |
+|------|-------|
+| Navegadores | Chrome, Edge e Firefox com X25519MLKEM768 por padrão |
+| Bibliotecas | OpenSSL 3.5 (abr/2025) com ML-KEM, ML-DSA e SLH-DSA |
+| Acesso remoto | OpenSSH 10 com troca híbrida por padrão |
+| Mensageria | Signal (PQXDH e SPQR), iMessage (PQ3) |
+| Móvel | Android 17 com ML-DSA na raiz de confiança de hardware |
+| Infraestrutura | Cloudflare com autenticação ML-DSA até as origens |
+
+**Números de adoção:** cerca de **65%** do tráfego humano da Cloudflare usa troca de chaves PQ (abr/2026), contra cerca de 2% no início de 2024. Mas só cerca de **12% das origens** suportam. O servidor corporativo é o gargalo.
+
+**Atrasados:** certificados da Web pública, VPNs corporativas, IoT, e-mail, DNSSEC e blockchains.
+
+<Callout title="Padrão visível nos números">
+  O lado do **cliente** (navegador) migrou rápido, o lado do **servidor** (origens corporativas) não. Isso é o retrato típico de uma migração: quem controla o software atualiza, quem tem sistema legado não.
+</Callout>
+
+## O caso brasileiro
+
+**IN ITI 35/2026 (fev/2026)** atualiza os padrões criptográficos da ICP-Brasil para incluir **ML-DSA e ML-KEM**, com tamanhos de chave, validade de certificados e procedimentos para a AC-Raiz e as ACs subordinadas. Há também um GT técnico de criptografia pós-quântica (jun/2026) com prazo inicial de 90 dias.
+
+**Por que é difícil:** documentos assinados precisam ser validáveis por décadas. A migração envolve a raiz da cadeia, HSMs homologados, carimbo do tempo, validadores de terceiros e o arcabouço jurídico (MP 2.200-2/2001). Afeta a Assinatura Gov.br, com mais de 1 milhão de emissões por dia.
+
+O SBSeg 2026 já publicou trabalhos sobre a adaptação da ICP-Brasil, então há comunidade nacional ativa.
+
+## Merkle Tree Certificates
+
+Uma cadeia X.509 com assinaturas PQ soma cerca de **14.700 bytes** de autenticação no handshake. O Chrome anunciou (fev/2026) que não pretende aceitar X.509 com PQ em sua raiz pública. Alternativa: a AC assina uma vez a raiz de uma árvore com milhões de certificados, e o navegador recebe só a **prova de inclusão** (até cerca de 736 bytes).
+
+<Video id="4CEqh8OIYCw" title="PQC and Crypto Agility: Hybrid Certificates, Different Formats, and Migration Strategies" meta="OpenSSF, 16 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="info">
+  Relevante para a motivação e para o trabalho futuro (autenticação). Estimar o custo em bytes da cadeia de certificados com ML-DSA é uma extensão natural da pesquisa.
+</Callout>

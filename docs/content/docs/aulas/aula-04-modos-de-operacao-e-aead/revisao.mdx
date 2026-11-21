@@ -1,0 +1,22 @@
+---
+title: Perguntas de revisão
+description: Para responder sem consulta, com a página onde está a resposta
+---
+
+| # | Pergunta | Onde conferir |
+|---|----------|---------------|
+| 1 | Por que a cifração determinística nunca é CPA segura? Descreva o ataque | [IV e nonce](/docs/aulas/aula-04-modos-de-operacao-e-aead/cpa-iv-e-nonce) |
+| 2 | Qual a diferença entre IV e nonce, e o que acontece quando cada um falha? | [IV e nonce](/docs/aulas/aula-04-modos-de-operacao-e-aead/cpa-iv-e-nonce) |
+| 3 | Por que o ECB vaza a estrutura e permite recorta e cola? | [ECB](/docs/aulas/aula-04-modos-de-operacao-e-aead/ecb) |
+| 4 | Escreva as fórmulas de cifração e decifração do CBC e diga o que é paralelizável | [CBC](/docs/aulas/aula-04-modos-de-operacao-e-aead/cbc) |
+| 5 | Explique o BEAST em termos de IV previsível | [Ataques ao CBC](/docs/aulas/aula-04-modos-de-operacao-e-aead/cbc-ataques) |
+| 6 | Como funciona o oráculo de padding e por que basta 1 bit de resposta? | [Ataques ao CBC](/docs/aulas/aula-04-modos-de-operacao-e-aead/cbc-ataques) |
+| 7 | Por que o CTR dispensa padding e nunca usa a decifração do AES? | [CTR](/docs/aulas/aula-04-modos-de-operacao-e-aead/ctr) |
+| 8 | O que acontece com o CTR quando o contador se repete? E quando um bit do ciphertext muda? | [CTR: nonce e maleabilidade](/docs/aulas/aula-04-modos-de-operacao-e-aead/ctr-nonce-e-maleabilidade) |
+| 9 | Por que CPA mais integridade do ciphertext implica CCA? | [Confidencialidade não basta](/docs/aulas/aula-04-modos-de-operacao-e-aead/integridade-e-cca) |
+| 10 | Qual das três composições (cifrar e autenticar, autenticar e cifrar, cifrar e autenticar) é recomendada, e por quê? | [Confidencialidade não basta](/docs/aulas/aula-04-modos-de-operacao-e-aead/integridade-e-cca) |
+| 11 | O que são dados associados e qual problema do ECB eles resolvem? | [AEAD](/docs/aulas/aula-04-modos-de-operacao-e-aead/aead) |
+| 12 | Como o GCM combina CTR e GHASH, e o que o `EK(J0)` faz na etiqueta? | [AES-GCM](/docs/aulas/aula-04-modos-de-operacao-e-aead/aes-gcm) |
+| 13 | Descreva o ataque de nonce repetido no GCM, passo a passo | [Nonce repetido no GCM](/docs/aulas/aula-04-modos-de-operacao-e-aead/gcm-nonce-repetido) |
+| 14 | Por que existe o ChaCha20-Poly1305 se já existe o AES-GCM? | [ChaCha20-Poly1305](/docs/aulas/aula-04-modos-de-operacao-e-aead/chacha20-poly1305) |
+| 15 | Como o TLS 1.3 forma o nonce e por que isso evita repetição? | [Na prática](/docs/aulas/aula-04-modos-de-operacao-e-aead/na-pratica) |

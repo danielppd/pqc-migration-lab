@@ -1,0 +1,62 @@
+---
+title: Dupla cifração, 3DES e Sweet32
+description: A migração de transição que durou décadas e o limite do aniversário
+---
+
+## Cifrar duas vezes não dobra a segurança
+
+No 2DES, `c = DES_k2(DES_k1(m))`. O ataque de **encontro no meio**:
+
+<Steps>
+  <Step>**Passo de ida:** para cada uma das `2^56` chaves k1, calcule `DES_k1(m)` e guarde numa tabela.</Step>
+  <Step>**Passo de volta:** para cada k2, calcule `DES_k2^-1(c)` e procure na tabela. Uma coincidência indica um candidato (k1, k2).</Step>
+  <Step>**Custo:** cerca de `2^57` operações e `2^56` entradas de memória. A dupla cifração vale perto de 57 bits, não 112.</Step>
+</Steps>
+
+<Video id="IZFaZDO3-GQ" title="2DES and Meet in the Middle Attack" meta="Ahmed Ibrahim, 8 min, inglês" />
+
+## 3DES (TDEA): a solução de transição
+
+`c = DES_k3(DES_k2^-1(DES_k1(m)))`: cifrar, decifrar, cifrar (EDE).
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/b/b7/3des-overall-view.png"
+  alt="Visão geral do 3DES em modo EDE"
+  caption="3DES: três aplicações do DES com chaves k1, k2 e k3."
+  credit="Wikimedia Commons, CC BY-SA 3.0"
+  href="https://commons.wikimedia.org/wiki/File:3des-overall-view.png"
+/>
+
+| Aspecto | Detalhe |
+|---------|---------|
+| Por que EDE | Com `k1 = k2 = k3` os dois primeiros passos se cancelam e o 3DES vira um DES simples. **Isso permitiu migrar sistemas sem quebrar a compatibilidade** |
+| Segurança efetiva | 3 chaves independentes, 168 bits de chave, cerca de **112 bits de segurança** por causa do encontro no meio. A variante de duas chaves foi proibida pelo NIST em 2017 |
+| Fim de vida | O NIST limitou o uso a `2^20` blocos por conjunto de chaves (2017). Cifrar com 3DES deixou de ser permitido após 31/12/2023, e decifrar dados antigos segue permitido |
+
+<Video id="4R_kocR1roM" title="Multiple Encryption and Triple DES" meta="Neso Academy, 21 min, inglês" />
+
+## Bloco de 64 bits: o limite do aniversário
+
+Com blocos de n bits, após cerca de `2^(n/2)` blocos cifrados com a mesma chave é provável que dois ciphertexts coincidam. Para n = 64, são `2^32` blocos, ou **32 GB**. No modo CBC, dois blocos de ciphertext iguais entregam o XOR dos blocos de texto claro correspondentes. Se um deles é conhecido, o outro sai.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Birthday_Paradox.svg"
+  alt="Gráfico do paradoxo do aniversário"
+  caption="Paradoxo do aniversário: a probabilidade de colisão cresce muito mais rápido do que a intuição sugere."
+  credit="Rajkiran g, Wikimedia Commons, CC BY-SA 3.0"
+  href="https://commons.wikimedia.org/wiki/File:Birthday_Paradox.svg"
+/>
+
+<Video id="jsraR-el8_o" title="Hash Collisions and the Birthday Paradox" meta="Computerphile, 14 min, inglês" />
+
+### Sweet32
+
+Bhargavan e Leurent (ACM CCS 2016) fizeram o navegador da vítima gerar tráfego HTTPS longo com 3DES e recuperaram um **cookie de autenticação de 16 bytes** após cerca de 785 GB. Tamanho de bloco é parâmetro de segurança, assim como tamanho de chave. O AES usa blocos de 128 bits.
+
+<Video id="xNDSv3eJJHI" title="tl;dr of Sweet32" meta="David Wong, 23 min, inglês" />
+
+Site do ataque: [sweet32.info](https://sweet32.info/).
+
+<Callout title="Aplicação no artigo" type="success">
+  Caso mais próximo do tema. O 3DES foi uma migração por compatibilidade (k1 = k2 = k3 vira DES), foi permitido até 2023 e ainda é usado por alguns bancos, segundo a Aula 2. O híbrido X25519 + ML-KEM é o análogo moderno: uma solução de transição que mantém o clássico junto. Questão para a discussão: o que as duas transições têm em comum, e o que muda?
+</Callout>

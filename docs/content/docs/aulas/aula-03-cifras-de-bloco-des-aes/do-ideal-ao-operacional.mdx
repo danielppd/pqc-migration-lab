@@ -1,0 +1,80 @@
+---
+title: Do ideal ao operacional
+description: O que se cede para cifrar o mundo e qual é o objeto-alvo de uma cifra de bloco
+---
+
+O One-Time Pad é perfeito e quase inútil em escala. Para cifrar volumes reais, é obrigatório trocar a segurança perfeita por segurança computacional, e o desenho de uma cifra de bloco é a forma de fazer essa troca de modo controlado.
+
+## O ponto de partida
+
+<Tabs items={['Garante', 'Exige', 'Não oferece']}>
+  <Tab value="Garante">
+    Segurança perfeita: o ciphertext não ensina nada, nem a um adversário com poder ilimitado, clássico ou quântico.
+  </Tab>
+  <Tab value="Exige">
+    Chave aleatória do tamanho da mensagem, usada uma única vez e combinada antes por canal seguro.
+  </Tab>
+  <Tab value="Não oferece">
+    Integridade (o XOR é maleável) nem reuso de chave (`c1 XOR c2 = m1 XOR m2`).
+  </Tab>
+</Tabs>
+
+Pelo teorema de Shannon, toda cifra perfeitamente segura precisa de pelo menos tantas chaves quanto mensagens. Para usar uma chave de 128 bits em terabytes de dados, a segurança perfeita precisa ser abandonada.
+
+## O que uma cifra operacional precisa entregar
+
+| Requisito | Por quê | Consequência de projeto |
+|-----------|---------|-------------------------|
+| Chave curta e reutilizável (128 ou 256 bits) | Distribuir e guardar chaves é caro | Abrir mão da segurança perfeita |
+| Cifrar terabytes com a mesma chave | Volume real de tráfego e armazenamento | Rapidez em hardware e em software |
+| Do cartão inteligente ao servidor | Plataformas muito diferentes | Operações simples, tabelas pequenas, paralelismo |
+| Implementação verificável e em tempo constante | Quebras reais vêm da implementação | Evitar acessos à memória que dependam de segredos |
+| O atacante conhece e escolhe textos claros | Modelo de ameaça realista | Cifra de bloco pseudoaleatória e um modo de operação |
+| Resistência a adversários realistas | Segurança operacional, não perfeita | Bloco grande o bastante para o limite do aniversário |
+
+Vários requisitos puxam em direções opostas. Projetar uma cifra é escolher onde ficar entre segurança e eficiência, e documentar por quê.
+
+## O objeto ideal: a permutação aleatória
+
+Para blocos de n bits, o comportamento ideal de uma cifra de bloco é o de uma permutação sorteada entre todas as `(2^n)!` possíveis: cada entrada leva a uma saída imprevisível, sem estrutura.
+
+**Por que não usar diretamente:** descrever uma permutação aleatória exige cerca de `n * 2^n` bits. Para n = 64, são cerca de `2^70` bits (da ordem de 147 exabytes). Para n = 128, `2^135` bits. Nenhuma chave cabe nisso.
+
+**A ideia operacional:** uma chave de 128 bits escolhe uma permutação dentro de uma família de apenas `2^128` permutações, gerada por um algoritmo curto e público. A exigência é que, para quem não conhece a chave, a permutação escolhida seja **indistinguível de uma aleatória**.
+
+## Permutação pseudoaleatória (PRP)
+
+Um distinguidor D conversa com um oráculo que opera em um de dois mundos:
+
+| Mundo | Resposta do oráculo |
+|-------|---------------------|
+| 1 | `y = E_k(x)`, com chave aleatória |
+| 2 | `y = π(x)`, com π uma permutação aleatória |
+
+A cifra é uma PRP se, para todo distinguidor eficiente, `|Pr[D vence no mundo 1] - Pr[D vence no mundo 2]|` é desprezível. **Ninguém prova isso para o DES ou o AES.** A evidência é a criptoanálise pública acumulada.
+
+## O que se troca e o que se ganha
+
+| | One-Time Pad | Cifra de bloco com modo de operação |
+|---|--------------|-------------------------------------|
+| Chave | Do tamanho da mensagem | 128 ou 256 bits, fixos |
+| Reuso da chave | Proibido | Permitido, dentro de um limite de uso |
+| Garantia | Perfeita, contra qualquer adversário | Computacional, contra adversários eficientes |
+| Suposição | Nenhuma | A cifra se comporta como permutação pseudoaleatória |
+| Custo por byte | Um XOR, mas um byte de chave nova | Algumas dezenas de operações simples, ou menos de um ciclo com instruções dedicadas |
+| Limite de uso | Uma mensagem | Muitas mensagens; limite dado pelo tamanho do bloco |
+
+## As quatro alavancas de projeto
+
+| Alavanca | Mais significa | Custo | DES | AES |
+|----------|----------------|-------|-----|-----|
+| Tamanho da chave | Resiste à busca exaustiva | Quase nenhum no algoritmo; mais chaves de rodada | 56 | 128 a 256 |
+| Tamanho do bloco | Adia colisões (limite do aniversário) e padrões | Registradores e barramentos maiores | 64 | 128 |
+| Número de rodadas | Margem contra criptoanálise | Tempo proporcional | 16 | 10, 12 ou 14 |
+| Componente não linear | Melhores propriedades contra diferencial e linear | Memória ou área | 6 para 4 bits | 8 para 8 bits |
+
+Uma cifra moderna é um ponto escolhido nesse espaço, com justificativa pública para cada coordenada.
+
+<Callout title="Aplicação no artigo" type="success">
+  Esse mesmo raciocínio de **troca explícita** reaparece na migração pós-quântica: o ML-KEM e o híbrido também são pontos escolhidos num espaço de segurança, desempenho e tamanho, e o experimento mede justamente a coordenada "tamanho em bytes".
+</Callout>

@@ -1,0 +1,58 @@
+---
+title: Rede de Feistel
+description: Como decifrar sem inverter a função f
+---
+
+Uma cifra de bloco é uma permutação invertível para cada chave: `DES_k` leva 64 bits em 64 bits. A rede de Feistel é o jeito de construir essa permutação a partir de uma função f **que nem precisa ser invertível**.
+
+## Uma rodada
+
+```
+L_i = R_{i-1}
+R_i = L_{i-1} XOR f(R_{i-1}, K_i)
+```
+
+A metade direita atravessa a rodada sem alteração e vira a nova esquerda. A esquerda é mascarada por f, que depende da direita e da subchave. Cada rodada altera só metade do bloco.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Feistel_cipher_diagram_en.svg"
+  alt="Diagrama da rede de Feistel com várias rodadas"
+  caption="Rede de Feistel: cada rodada troca as metades e mascara uma delas com f."
+  credit="Wikimedia Commons, CC BY-SA 3.0"
+  href="https://commons.wikimedia.org/wiki/File:Feistel_cipher_diagram_en.svg"
+/>
+
+## Decifrar sem inverter f
+
+Conhecendo `L_i`, `R_i` e `K_i`:
+
+```
+R_{i-1} = L_i
+L_{i-1} = R_i XOR f(L_i, K_i)
+```
+
+Como `L_i = R_{i-1}`, o valor `f(R_{i-1}, K_i)` pode ser **recalculado** e cancelado pelo XOR. Logo f não precisa ser invertível (no DES não é: expande 32 para 48 bits e as S-boxes comprimem 6 em 4). O projetista escolhe f só pela segurança. Decifrar é executar as mesmas 16 rodadas com as subchaves em ordem inversa, `K16, K15, ..., K1`.
+
+## Exemplo de brinquedo (verificável à mão)
+
+Metades de 4 bits, 2 rodadas, `f(R, K) = (R AND K) XOR 0101`. O AND destrói informação, então f não é invertível.
+
+| | L | R |
+|---|---|---|
+| Mensagem | 1010 | 0110 |
+| Rodada 1 (K1 = 1100) | 0110 | 1011 |
+| Rodada 2 (K2 = 0011) | 1011 | 0000 |
+
+Decifrando com K2 e depois K1:
+
+<Steps>
+  <Step>`R1 = L2 = 1011` e `L1 = R2 XOR f(L2, K2) = 0000 XOR 0110 = 0110`.</Step>
+  <Step>`R0 = L1 = 0110` e `L0 = R1 XOR f(L1, K1) = 1011 XOR 0001 = 1010`.</Step>
+  <Step>Resultado: `1010 0110`, a mensagem original, sem nunca inverter f.</Step>
+</Steps>
+
+<Video id="FGhj3CGxl8I" title="Feistel Cipher" meta="Computerphile, 8 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. O princípio "projetar uma peça que não precisa ser invertível" reaparece no ML-KEM, onde a transformação Fujisaki-Okamoto converte um esquema simples em um KEM seguro.
+</Callout>

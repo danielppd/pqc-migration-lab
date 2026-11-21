@@ -1,0 +1,55 @@
+---
+title: One-Time Pad
+description: A cifra perfeita, a prova e por que o XOR
+---
+
+## Construção
+
+Espaços `M = K = C = {0,1}^n`. `Gen` escolhe k uniforme em `{0,1}^n`. `Enc_k(m) = m XOR k`. `Dec_k(c) = c XOR k`.
+
+| a | b | a XOR b |
+|---|---|---------|
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
+
+**Correção:** `(m XOR k) XOR k = m XOR (k XOR k) = m XOR 0 = m`. Aplicar a mesma chave duas vezes desfaz a operação.
+
+## Exemplo bit a bit
+
+| | Bits | Hex |
+|---|------|-----|
+| m = "OI" | `01001111 01001001` | `4F 49` |
+| k (aleatória) | `10110010 01101100` | `B2 6C` |
+| c = m XOR k | `11111101 00100101` | `FD 25` |
+| c XOR k | `01001111 01001001` | "OI" |
+
+## Por que XOR e não AND ou OR
+
+1. É **reversível**.
+2. Com chave uniforme a saída é uniforme, seja qual for o bit da mensagem. Com AND ou OR e duas entradas uniformes, a saída tem viés (o AND dá 0 em 75% dos casos) e não dá para reverter.
+
+<Video id="FlIG3TvQCBQ" title="The one-time pad" meta="Khan Academy, 3 min, inglês" />
+
+## A prova de que é perfeito
+
+<Steps>
+  <Step>Fixe quaisquer `m` e `c` em `{0,1}^n`.</Step>
+  <Step>`Enc_K(m) = c` se e somente se `m XOR K = c` se e somente se `K = m XOR c`.</Step>
+  <Step>K é uniforme, então `Pr[K = m XOR c] = 1/2^n`. **Este passo usa a uniformidade da chave.**</Step>
+  <Step>Logo `Pr[Enc_K(m) = c] = 1/2^n` para **qualquer** m.</Step>
+  <Step>Pela formulação equivalente, o esquema é perfeitamente seguro. ∎</Step>
+</Steps>
+
+**Intuição:** para cada par (m, c) existe exatamente uma chave que leva m em c. Como todas as chaves são igualmente prováveis, todos os c são igualmente prováveis, seja qual for m.
+
+## Um ciphertext, qualquer mensagem
+
+Com `c = 07 2A 7C`: a chave `54 63 31` dá "SIM" e a chave `49 6B 33` dá "NAO". As duas têm a mesma probabilidade, `1/2^24`. Quem não tem a chave não tem motivo para preferir uma resposta.
+
+<Video id="0xOwSbh9w68" title="The Only Cipher Infinite Computing Power Can't Break" meta="Coding Man, 14 min, inglês" />
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. O padrão da prova (para cada par existe exatamente uma chave) reaparece na discussão sobre S-boxes e aleatoriedade.
+</Callout>

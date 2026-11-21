@@ -1,0 +1,60 @@
+---
+title: "SubBytes: inverso no corpo e transformação afim"
+description: A S-box do AES e por que ela é definida por álgebra, e não por uma tabela arbitrária
+---
+
+O SubBytes aplica a mesma S-box a cada um dos 16 bytes do estado. É a **única fonte de não linearidade** do AES.
+
+## Como a S-box é definida
+
+<Steps>
+  <Step>
+    **Passo não linear:** `y = x^-1` no corpo GF(2^8) (com `0` indo para `0`). Verificação: `{53} · {ca} = {01}`.
+  </Step>
+  <Step>
+    **Passo afim:** cada bit de saída é o XOR de 5 bits de y mais um bit da constante `63 = 0110 0011`.
+  </Step>
+</Steps>
+
+Exemplo: `x = 53`, inverso `ca`, depois a transformação afim, resultando em `S(53) = ed`. Outro: `S(19) = d4`, usado no exemplo completo.
+
+## Tabela pública e verificável
+
+Qualquer pessoa reconstrói as 256 entradas a partir da definição. Não há critérios secretos, ao contrário das S-boxes do DES.
+
+<Figure
+  src="https://upload.wikimedia.org/wikipedia/commons/a/a4/AES-SubBytes.svg"
+  alt="Diagrama da operação SubBytes do AES: cada byte do estado passa pela S-box"
+  caption="SubBytes: cada byte do estado é substituído de forma independente pela S-box."
+  credit="Matt Crypto, Wikimedia Commons, domínio público"
+  href="https://commons.wikimedia.org/wiki/File:AES-SubBytes.svg"
+/>
+
+## Por que o inverso e por que a afim
+
+| Propriedade da S-box | Valor |
+|----------------------|-------|
+| Maior entrada da DDT | 4 de 256, probabilidade `2^-6` |
+| Maior correlação linear | `2^-3` |
+| Pontos fixos `S(x) = x` | Nenhum |
+| `S(x)` igual ao complemento de x | Nenhum |
+
+<Tabs items={['Por que o inverso', 'Por que a afim', 'Por que a constante 63']}>
+  <Tab value="Por que o inverso">
+    É praticamente o melhor possível contra a diferencial e a linear para 8 bits (Nyberg, 1993).
+  </Tab>
+  <Tab value="Por que a afim">
+    O inverso sozinho é `x^254`: uma expressão algébrica curta demais. A afim quebra essa estrutura sem piorar as propriedades acima.
+  </Tab>
+  <Tab value="Por que a constante 63">
+    Escolhida para eliminar pontos fixos e pontos fixos opostos.
+  </Tab>
+</Tabs>
+
+<Callout title="Resposta ao DES" type="info">
+  No DES, as S-boxes foram ajustadas em segredo e a justificativa só veio depois (Coppersmith, 1994). No AES, a S-box nasce de uma definição algébrica simples, e as propriedades que importam podem ser **calculadas** por qualquer um.
+</Callout>
+
+<Callout title="Aplicação no artigo" type="info">
+  Fundamento. O contraste "tabela arbitrária contra definição algébrica" é um caso concreto do princípio de Kerckhoffs: transparência no projeto reduz a suspeita e facilita a análise pública.
+</Callout>

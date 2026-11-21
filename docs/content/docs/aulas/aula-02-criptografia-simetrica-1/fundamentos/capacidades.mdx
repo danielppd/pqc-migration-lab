@@ -1,0 +1,49 @@
+---
+title: Capacidades do adversário (COA, KPA, CPA, CCA)
+description: Do adversário mais fraco ao mais forte, com exemplos reais
+---
+
+## A escala
+
+| Sigla | Nome | O adversário consegue | Exemplo real |
+|-------|------|-----------------------|--------------|
+| COA | Ciphertext-only | Ver ciphertexts | Tráfego Wi-Fi capturado |
+| KPA | Known-plaintext | Conhecer pares (m, c) que não escolheu | Cabeçalhos previsíveis, criptoanálise linear do DES |
+| CPA | Chosen-plaintext | Pedir a cifração de mensagens que escolhe | BEAST, criptoanálise diferencial do DES |
+| CCA | Chosen-ciphertext | Também pedir a decifração de ciphertexts que escolhe | Padding oracle (Bleichenbacher, Vaudenay) |
+
+## A confusão clássica
+
+São duas escalas em sentidos opostos.
+
+<Accordions type="single">
+  <Accordion title="Cifra segura contra CCA">
+    É a garantia **mais forte**: resiste ao adversário mais poderoso. Segurança contra um modelo mais forte implica segurança contra todos os mais fracos.
+  </Accordion>
+  <Accordion title="Ataque que funciona só com COA">
+    É o ataque **mais crítico**, porque exige o mínimo do atacante. Formulação da Aula 2: quanto menos informação o ataque precisa, mais crítico ele é. Ter a chave nem é ataque.
+  </Accordion>
+</Accordions>
+
+## BEAST: um ataque de texto escolhido real
+
+<Steps>
+  <Step>
+    TLS 1.0 com CBC usava como vetor de inicialização o **último bloco cifrado**, um valor que o atacante já conhecia.
+  </Step>
+  <Step>
+    Um script malicioso no navegador da vítima envia requisições com conteúdo **escolhido pelo atacante**, na mesma conexão do cookie.
+  </Step>
+  <Step>
+    O atacante alinha os dados para que só um byte do cookie seja desconhecido em um bloco e testa palpites comparando blocos cifrados.
+  </Step>
+  <Step>
+    Byte a byte, o cookie é recuperado **sem a chave** (Duong e Rizzo, 2011). A correção foi IV aleatório no TLS 1.1 e depois AEAD.
+  </Step>
+</Steps>
+
+Por isso a segurança contra texto escolhido (CPA) é o requisito mínimo para cifras de uso geral: em sistemas modernos o atacante frequentemente influencia o que é cifrado.
+
+<Callout title="Aplicação no artigo" type="info">
+  O artigo é de **medição** e não ataca nenhum desses modelos. Ainda assim, o handshake TLS opera num mundo em que o adversário observa o canal (COA), e é isso que o híbrido precisa proteger contra um futuro computador quântico.
+</Callout>

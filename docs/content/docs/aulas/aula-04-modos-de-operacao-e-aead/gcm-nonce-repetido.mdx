@@ -1,0 +1,49 @@
+---
+title: "Nonce repetido no GCM: o ataque"
+description: Como um único nonce repetido entrega a chave de autenticação
+---
+
+Repetir um IV no GCM tem duas consequências: o **sigilo** cai como no CTR (vaza o XOR das mensagens), e a **autenticação** cai por completo.
+
+## A conta do ataque
+
+Duas mensagens cifradas com o mesmo IV têm etiquetas:
+
+```
+T1 = EK(J0) XOR C1·H^2 XOR L·H
+T2 = EK(J0) XOR C2·H^2 XOR L·H
+```
+
+<Steps>
+  <Step>
+    **XOR das etiquetas:** a máscara `EK(J0)` e o termo `L·H` se cancelam, e sobra `T1 XOR T2 = (C1 XOR C2)·H^2`.
+  </Step>
+  <Step>
+    **Recuperar a chave do hash:** `H^2 = (T1 XOR T2) / (C1 XOR C2)`. Em um corpo de característica 2, `H` é a raiz quadrada de `H^2`, **única** no corpo.
+  </Step>
+  <Step>
+    **Recuperar a máscara:** `EK(J0) = T1 XOR C1·H^2 XOR L·H`.
+  </Step>
+  <Step>
+    **Falsificar:** com `H` e `EK(J0)`, o atacante calcula uma etiqueta válida para **qualquer** texto cifrado `C` que escolher, sob aquele IV.
+  </Step>
+</Steps>
+
+Com mensagens longas, `H` é raiz de um polinômio conhecido, e fatorar resolve (Joux, 2006). No exemplo da aula, uma mensagem `saldo: R$ 120,00` e outra `saldo: R$ 980,00` com o mesmo IV bastaram para forjar `saldo: R$ 999,99`, e uma biblioteca de referência **aceitou** a mensagem forjada como autêntica.
+
+## Por que não funciona com outro IV
+
+| Valor | Depende de |
+|-------|-----------|
+| `H = EK(0^128)` | Só da chave |
+| `EK(J0)` | Da chave **e do IV** |
+
+O atacante recupera `H` e `EK(J0)` para aquele IV. Com um IV diferente, `EK(J0')` é desconhecido, e ele não consegue calcular a máscara da etiqueta.
+
+## No mundo real
+
+Böck et al. (2016) encontraram 184 servidores HTTPS que repetiam nonces no GCM. A pergunta de projeto é sempre: o sistema consegue garantir que o nonce **nunca** se repete, inclusive depois de falhas, reinícios e snapshots de máquina virtual?
+
+<Callout title="Aplicação no artigo" type="info">
+  O ataque mostra por que o TLS 1.3 deriva o nonce do **número de sequência** do registro (nunca repete na conexão e nem é enviado), em vez de confiar em escolha aleatória.
+</Callout>

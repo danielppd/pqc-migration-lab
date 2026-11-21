@@ -1,0 +1,33 @@
+---
+title: O que se sabe sobre a segurança do AES
+description: Criptoanálise pública, o efeito do computador quântico e onde está o risco real
+---
+
+| Linha de ataque | Resultado | Impacto prático |
+|-----------------|-----------|-----------------|
+| Biclique (2011) | AES-128 completo em cerca de `2^126,1` operações | Nenhum: ganho de fator 4 sobre a busca |
+| Chaves relacionadas (2009) | AES-256 no modelo de chaves relacionadas | Nenhum com chaves geradas ao acaso |
+| Versões reduzidas | Até 7 rodadas do AES-128 | Margem de 3 rodadas |
+| Grover (quântico) | Busca em cerca de `2^64` avaliações para o AES-128 | Usar AES-256 para proteção de longo prazo |
+| Canais laterais | Tempo, cache, consumo, falhas | **O risco real**: implementação em tempo constante |
+
+> Mais de 25 anos depois, a matemática do AES continua intacta. O que quebra na prática é a implementação.
+
+## O resultado de 2026 (Aula 1)
+
+A Aula 1 menciona, com base em material de 2026, um ataque ao AES-128 reduzido a 7 rodadas que é de 200 a 800 vezes mais rápido que o anterior, ainda impraticável (cerca de `2^105` textos escolhidos), sem afetar o AES completo. A mesma aula registra que nenhum padrão NIST finalizado foi afetado. A informação deve ser conferida na fonte primária antes de qualquer citação.
+
+## Como ler essa tabela
+
+<Accordions type="single">
+  <Accordion title="Por que um ataque 'melhor que a força bruta' pode ser irrelevante">
+    O biclique reduz a busca de `2^128` para `2^126,1`. Em tempo prático, é a diferença entre 10 bilhões de anos e cerca de 2,7 bilhões de anos, e nenhum dos dois é alcançável. Um ataque só importa se muda a classe de viabilidade.
+  </Accordion>
+  <Accordion title="Por que Grover não obriga a abandonar o AES">
+    Grover é sequencial e paraleliza mal, e exige um circuito de AES inteiro por passo. O NIST mantém AES-128 como aceitável, e a CNSA 2.0 exige AES-256 para sistemas de segurança nacional.
+  </Accordion>
+</Accordions>
+
+<Callout title="Aplicação no artigo" type="success">
+  Esta é a evidência de que a cifra simétrica do tráfego **não precisa migrar** com a mesma urgência que a troca de chaves, o que sustenta o escopo da pesquisa (apenas a troca de chaves).
+</Callout>

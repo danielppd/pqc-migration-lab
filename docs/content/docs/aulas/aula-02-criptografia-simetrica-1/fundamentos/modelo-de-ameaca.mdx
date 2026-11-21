@@ -1,0 +1,42 @@
+---
+title: Modelo de ameaça
+description: Contra quem, com quais recursos e para impedir o quê
+---
+
+Uma afirmação de segurança só tem sentido quando diz **contra quem**, **com quais recursos** e **para impedir o quê**. É por isso que todo paper e toda solução de segurança tem uma seção de modelo de ameaças.
+
+## As três perguntas
+
+<Tabs items={['Capacidades', 'Recursos', 'Objetivo']}>
+  <Tab value="Capacidades">
+    O que o adversário **pode fazer**? Só observar ciphertexts, conhecer pares de texto claro, escolher mensagens para cifrar ou escolher ciphertexts para decifrar.
+  </Tab>
+  <Tab value="Recursos">
+    Quanto ele **pode computar**? Poder ilimitado ou tempo limitado, computador clássico ou quântico. Um notebook ou um supercomputador.
+  </Tab>
+  <Tab value="Objetivo">
+    O que **conta como quebra**? Recuperar a chave, a mensagem inteira, parte dela, ou aprender **qualquer** informação (a definição mais forte).
+  </Tab>
+</Tabs>
+
+Uma definição de segurança é a combinação: **modelo de ameaça** (capacidades e recursos) mais **objetivo de segurança** (o que deve ser impossível).
+
+## O cenário clássico
+
+O adversário controla o **canal público**: captura, intercepta e talvez injete mensagens. Ele **não** tem acesso à chave k. Isso é uma formalização, e precisa ficar explícita.
+
+## O que está fora do modelo
+
+A Aula 2 enfatiza que a criptografia estuda **esquemas teóricos**, não implementação nem gestão de chaves. Se o atacante rouba a chave do disco, a cifra não falhou, o modelo é que não cobria isso.
+
+<Callout title="Exemplo da Aula 2">
+  Quebrar AES-128 por força bruta levaria 10,8 bilhões de anos, mas um arquivo malicioso enviado numa falsa entrevista de emprego rouba a chave na hora. Atacantes miram o elo mais fraco.
+</Callout>
+
+## Atacantes reais escolhem o elo mais fraco
+
+Ninguém ataca o AES para roubar uma corretora de criptomoedas. Ataca-se uma pessoa, um site ou o host. Segurança de aplicação e de rede é o que dá valor à criptografia.
+
+<Callout title="Aplicação no artigo" type="success">
+  Seção obrigatória do artigo. O modelo adotado: adversário quântico passivo, com implementação, gestão de chaves e autenticação **fora** do escopo. Detalhes em [Modelo de ameaças](/docs/artigo/modelo-de-ameacas).
+</Callout>

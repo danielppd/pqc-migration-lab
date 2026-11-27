@@ -13,17 +13,29 @@ set -euo pipefail
 OPENSSL="${OPENSSL:-/opt/homebrew/opt/openssl@3.6/bin/openssl}"
 PORT=14433
 GROUPS_TESTADOS="X25519 MLKEM768 X25519MLKEM768 SecP256r1MLKEM768"
+DIR="$(cd "$(dirname "$0")" && pwd)"
+CERT_DIR="$DIR/cert"
 WORK="$(mktemp -d)"
 trap 'kill "$SERVER_PID" 2>/dev/null || true; rm -rf "$WORK"' EXIT
 
 echo "# $("$OPENSSL" version)"
 
-# Certificado autoassinado so para o teste (ECDSA P-256, ou seja, autenticacao CLASSICA).
-"$OPENSSL" req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
-  -keyout "$WORK/k.pem" -out "$WORK/c.pem" -subj "/CN=localhost" -days 2 2>/dev/null
+# Certificado FIXO (ECDSA P-256, autenticacao classica), gerado uma unica vez e
+# reusado em toda execucao. Antes o certificado era gerado a cada run, e a
+# assinatura ECDSA de tamanho variavel em DER (70 a 72 bytes) fazia o total do
+# servidor oscilar entre execucoes. Fixar o certificado remove essa variavel de
+# confusao: o que varia entre condicoes passa a ser so o grupo de troca de chaves.
+if [ ! -f "$CERT_DIR/c.pem" ] || [ ! -f "$CERT_DIR/k.pem" ]; then
+  mkdir -p "$CERT_DIR"
+  "$OPENSSL" req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+    -keyout "$CERT_DIR/k.pem" -out "$CERT_DIR/c.pem" -subj "/CN=localhost" -days 3650 2>/dev/null
+  echo "# certificado fixo gerado em cert/ (reusado nas proximas execucoes)"
+else
+  echo "# usando certificado fixo existente em cert/"
+fi
 
 # Servidor aceita todos os grupos testados.
-"$OPENSSL" s_server -accept "$PORT" -cert "$WORK/c.pem" -key "$WORK/k.pem" -tls1_3 \
+"$OPENSSL" s_server -accept "$PORT" -cert "$CERT_DIR/c.pem" -key "$CERT_DIR/k.pem" -tls1_3 \
   -groups "$(echo "$GROUPS_TESTADOS" | tr ' ' ':')" -www -quiet >/dev/null 2>&1 &
 SERVER_PID=$!
 disown "$SERVER_PID"   # evita a mensagem "Terminated" quando o trap encerrar o servidor

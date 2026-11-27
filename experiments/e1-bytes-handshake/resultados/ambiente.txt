@@ -1,0 +1,10 @@
+data: 2026-11-20
+macOS: 26.7.2
+arquitetura: arm64
+cpu: Apple M5
+OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)
+
+Validacao cruzada (semana 2):
+oqs-provider: 0.13.0-dev (compilado do fonte, branch main)
+liboqs: 0.16.0-dev (mesmo stream, compilado do fonte)
+ligados ao OpenSSL 3.6.4 do Homebrew; carregados sob demanda via -provider.

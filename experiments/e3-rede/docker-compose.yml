@@ -1,0 +1,41 @@
+# Infra do E3: dois containers (servidor e cliente) numa rede dedicada.
+# O netem e aplicado DENTRO dos containers em runtime (precisa de NET_ADMIN),
+# nao aqui, para variar RTT/perda/MTU sem recriar os containers.
+
+services:
+  servidor:
+    build: .
+    image: e3-rede
+    container_name: e3-servidor
+    cap_add:
+      - NET_ADMIN        # necessario para tc/netem e para alterar MTU
+    networks:
+      lab:
+        ipv4_address: 172.30.0.10
+    volumes:
+      - ./scripts:/e3/scripts:ro
+      - ./resultados:/e3/resultados
+    working_dir: /e3
+
+  cliente:
+    build: .
+    image: e3-rede
+    container_name: e3-cliente
+    cap_add:
+      - NET_ADMIN
+    networks:
+      lab:
+        ipv4_address: 172.30.0.20
+    volumes:
+      - ./scripts:/e3/scripts:ro
+      - ./resultados:/e3/resultados
+    working_dir: /e3
+    depends_on:
+      - servidor
+
+networks:
+  lab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

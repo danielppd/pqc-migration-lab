@@ -1,0 +1,110 @@
+---
+title: Do tema ao plano
+description: Escolha do tema, onde está a novidade, plano de uma página, exemplo, distribuição do tempo, ferramentas e checklist
+---
+
+Escolher bem o tema é metade do artigo. A outra metade é um plano que cabe em uma página.
+
+## O bom tema une três coisas
+
+Se faltar uma delas, o artigo trava no meio do caminho.
+
+| Elemento | Pergunta | O que significa |
+|----------|----------|-----------------|
+| Interesse | Vou conviver com o tema por semanas? | Conectar com algo que se usa: senhas, celular, mensagens, jogos, bancos |
+| Viabilidade | Roda no notebook? As bibliotecas existem? Dá para terminar no prazo? | Prazo vira entrega |
+| Lacuna | Em uma hora de busca, acho o mesmo trabalho já feito? | Se sim, mudar o computador, a escala ou a pergunta |
+
+Se faltar um dos três, troque de tema agora, não na semana da entrega.
+
+## Onde está a novidade
+
+Contribuição não precisa ser revolucionária. Precisa ser nova em pelo menos uma dimensão.
+
+| Dimensão | O que é |
+|----------|---------|
+| Novo domínio | Mesmo método, contexto diferente: a medição feita em servidores, agora no celular |
+| Nova escala | Mais funções, mais entradas, mais máquinas: o que só foi medido em um cenário, agora em vários |
+| Novo cenário | Do exemplo de livro para dados reais, como textos em português em vez de inglês |
+| Nova comparação | Contra uma alternativa mais forte, ou mais justa, do que a usada na literatura |
+| Combinação | Juntar duas ideias que ninguém juntou, como detectores de mau uso aplicados a código gerado por IA |
+| Replicação crítica | Reproduzir um artigo publicado e verificar se o resultado se sustenta em outras condições |
+
+<Callout title="Dica">
+  A seção "Trabalhos futuros" dos artigos entrega as lacunas de graça: os autores dizem ali o que ficou faltando.
+</Callout>
+
+## O plano de pesquisa em uma página
+
+Preencha antes de escrever qualquer linha de código. Ele vira o esqueleto do artigo.
+
+<Steps>
+  <Step>**Título provisório.** Específico: técnica, onde e condição.</Step>
+  <Step>**Pergunta de pesquisa.** Uma frase, com escopo, métrica e comparação.</Step>
+  <Step>**Hipóteses.** H₁ e H₀, ambas falsificáveis.</Step>
+  <Step>**Método e ferramentas.** Técnica, biblioteca, computador e como vai medir.</Step>
+  <Step>**Dados ou cenários.** Listas de senhas, arquivos de teste, textos ou imagens.</Step>
+  <Step>**Baseline.** A alternativa mais usada, nas mesmas condições.</Step>
+  <Step>**Métricas.** O que será medido e com qual estatística.</Step>
+  <Step>**Riscos e plano B.** O que fazer se a biblioteca ou o experimento falharem.</Step>
+</Steps>
+
+Se não cabe em uma página, o escopo ainda está grande demais.
+
+## Exemplo completo, do tema ao experimento
+
+O exemplo que acompanha a aula, montado como plano de pesquisa.
+
+| Passo | Conteúdo |
+|-------|----------|
+| Tema | Como guardar senhas com segurança |
+| Lacuna | Medições anteriores só em servidores com GPU e sem variar o custo |
+| Pergunta | Num notebook comum, o bcrypt (custo 12) torna o ataque de dicionário pelo menos 1000 vezes mais lento que o SHA-256? |
+| Método | Python com hashlib, bcrypt e argon2-cffi; 10 mil senhas comuns; 30 repetições; mediana, IQR e Mann-Whitney |
+| Contribuição | Medição reprodutível e uma recomendação de fator de custo para sistemas pequenos |
+
+Nenhum passo promete quebrar ou inventar um algoritmo, e o artigo continua valendo.
+
+## Onde vai o seu tempo
+
+Uma divisão de referência, a ajustar ao calendário da disciplina.
+
+| Etapa | Esforço | O que entrega |
+|-------|---------|---------------|
+| Revisão da literatura e pergunta | 20% | A tabela comparativa e o plano |
+| Desenho do experimento | 15% | Variáveis, baseline, métricas e ambiente configurado |
+| Experimentos e análise | 35% | Execuções, repetições, estatística e figuras |
+| Escrita | 20% | Começa pela metodologia; o resumo fica por último |
+| Revisão e reprodutibilidade | 10% | Rodar o repositório do zero e revisar o texto |
+
+O erro mais comum é começar pelo código e descobrir a pergunta no final.
+
+## O kit básico do pesquisador
+
+Tudo gratuito ou com plano acadêmico.
+
+| Onde ler | Onde rodar | Onde escrever |
+|----------|-----------|---------------|
+| IACR Cryptology ePrint Archive | Python: hashlib, cryptography e bcrypt | Overleaf, com template LNCS, IEEE ou SBC |
+| Google Scholar e Semantic Scholar | CyberChef e CrypTool, para experimentar | Zotero, para referências |
+| Anais do SBSeg e do WTICG | John the Ripper, para testar senhas | GitHub, para código e dados |
+| Guias do NIST, como o SP 800-63B | liboqs-python, para pós-quântica | Notebooks que geram as figuras |
+
+## Checklist antes de entregar
+
+Dez perguntas que um revisor faria sobre o artigo.
+
+1. A pergunta cabe em uma frase e é respondida na conclusão?
+2. As contribuições estão listadas na introdução?
+3. Os trabalhos relacionados estão comparados em tabela?
+4. A comparação é justa: mesma máquina e mesma biblioteca?
+5. Há muitas repetições, com mediana e dispersão?
+6. Fica claro contra qual atacante se testou?
+7. As ameaças à validade estão discutidas?
+8. Código e dados estão em repositório público?
+9. Nenhum "seguro" ou "quebrado" é alegado sem evidência?
+10. As figuras têm eixos, unidades e legenda legíveis?
+
+<Callout title="Aplicação no artigo" type="success">
+  O plano de uma página corresponde ao que a seção Artigo já registra: escopo, pergunta de pesquisa, hipóteses, método do experimento de bytes, baseline clássico (X25519) e cronograma. A novidade do trabalho é de nova comparação e novo cenário: medição aberta e reprodutível do custo da troca híbrida, com foco nos limites de rede.
+</Callout>

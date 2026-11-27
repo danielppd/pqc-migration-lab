@@ -1,0 +1,5 @@
+# macOS
+.DS_Store
+
+# registro interno de processo, nao faz parte da entrega
+DIARIO.md

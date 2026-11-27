@@ -1,0 +1,54 @@
+---
+title: Tipos de artigo
+description: Doze caminhos para um artigo em criptografia, do mais acessível ao mais ambicioso
+---
+
+Doze caminhos possíveis, ordenados por dificuldade. A dificuldade mede o risco de não terminar, não o valor do artigo. Todos geram bons artigos quando a pergunta é boa.
+
+## O mapa dos doze caminhos
+
+| Tipo | Tema | Dificuldade | Método típico |
+|------|------|-------------|---------------|
+| A | Velocidade de cifras | Baixa | Experimento comparativo |
+| B | Medidores de força de senha | Baixa | Experimento e comparação |
+| C | Erros no código | Baixa | Estudo empírico |
+| D | Educação e jogos | Baixa | Estudo com usuários |
+| E | Revisão sistemática | Baixa | Síntese da literatura |
+| F | Quebra de cifras clássicas | Média | Experimento e taxa de acerto |
+| G | Esteganografia | Média | Experimento com imagens |
+| H | IA e código criptográfico | Média | Estudo empírico |
+| I | Números aleatórios | Média | Testes estatísticos |
+| J | Pós-quântica | Alta | Experimento comparativo |
+| K | Homomórfica | Alta | Experimento e análise |
+| L | Esquemas e provas | Muito alta | Prova e implementação |
+
+## Dificuldade baixa
+
+| Tipo | Pergunta típica | Exemplo | Onde complica |
+|------|-----------------|---------|---------------|
+| A, desempenho | A cifra X é mais rápida que a Y no aparelho Z? | Cifrar arquivos de 1 MB a 100 MB com AES-GCM e ChaCha20, num notebook e num celular | Medir tempo é fácil de errar; diferenças pequenas pedem muitas repetições |
+| B, senhas | O medidor X classifica bem senhas fortes e fracas? | Testar 100 senhas no zxcvbn e em sites de cadastro e comparar com o que o John the Ripper quebra | Usar só senhas inventadas; cada site muda o medidor sem avisar |
+| C, engenharia de software | Com que frequência projetos reais usam criptografia errada? | Analisar 200 projetos do GitHub com o Bandit e contar quantos usam MD5 para senhas | Ferramentas dão alarmes falsos; é preciso conferir à mão |
+| D, educação | A atividade X ajuda alunos a entender criptografia? | Um jogo de cifra de César avaliado com teste antes e depois | O artigo não é o jogo, é a avaliação; precisa de grupo de comparação |
+| E, revisão | O que já se sabe sobre X, e o que ainda falta? | Mapear artigos sobre criptografia em aplicativos de mensagem publicados entre 2015 e 2026 | Dá muito trabalho manual; sem análise crítica, vira só uma lista de resumos |
+
+## Dificuldade média
+
+| Tipo | Pergunta típica | Exemplo | Onde complica |
+|------|-----------------|---------|---------------|
+| F, criptoanálise | Quanto texto é preciso para quebrar a cifra X automaticamente? | Quebrar Vigenère em português e medir a taxa de acerto de 50 a 2000 letras | As frequências do português diferem das do inglês; textos curtos derrubam o acerto |
+| G, esteganografia | A mensagem escondida sobrevive, e alguém percebe? | Esconder texto em fotos PNG e ver quanto resiste ao envio pelo WhatsApp | Compressão destrói a mensagem; quanto mais texto, mais fácil detectar |
+| H, inteligência artificial | Com que frequência a IA gera código criptográfico inseguro? | Pedir a 3 assistentes código para guardar senhas e contar quantos usam MD5 ou chave fixa | As respostas mudam a cada versão; precisa repetir e registrar datas |
+| I, aleatoriedade | O gerador X passa nos testes de aleatoriedade? | Comparar `random` e `secrets` do Python e um gerador quântico com os testes do NIST | Passar nos testes não prova segurança; o `random` passa e mesmo assim é previsível |
+
+## Dificuldade alta e muito alta
+
+| Tipo | Pergunta típica | Exemplo | Onde complica |
+|------|-----------------|---------|---------------|
+| J, pós-quântica | O algoritmo novo X é mais lento ou maior que o RSA? | Comparar tempo e tamanho das chaves de RSA e ML-KEM com a liboqs-python | É preciso entender a teoria para escolher os parâmetros e explicar os resultados |
+| K, privacidade | Dá para fazer a conta X com dados cifrados, e quanto mais demora? | Calcular a média de notas cifradas com o esquema de Paillier | Fica centenas de vezes mais lento; só algumas contas são possíveis |
+| L, esquemas e provas | Existe uma construção que faz X com menos custo, e é segura? | Um protocolo de desafio e resposta com prova de que quem escuta não descobre a senha | Provas são longas e fáceis de errar; esquemas novos caem rápido (o SIKE foi quebrado em cerca de uma hora, Castryck e Decru, 2022) |
+
+<Callout title="Aplicação no artigo" type="success">
+  A pesquisa deste repositório é do tipo J, pós-quântica, de dificuldade alta: um experimento comparativo de tempo e tamanho entre a troca de chaves clássica e a híbrida. O tipo J pede entender a teoria para escolher parâmetros e explicar resultados, o que motiva a seção de fundamentação e o modelo de ameaças.
+</Callout>

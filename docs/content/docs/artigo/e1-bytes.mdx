@@ -1,6 +1,6 @@
 ---
 title: E1, bytes do handshake
-description: O experimento exploratório já feito e o resultado inesperado
+description: Custo em bytes das mensagens de handshake por grupo de troca de chaves
 ---
 
 **Código:** [`experiments/e1-bytes-handshake`](https://github.com/danielppd/pqc-migration-lab/tree/main/experiments/e1-bytes-handshake) no repositório.
@@ -15,14 +15,16 @@ cd experiments/e1-bytes-handshake
 ./experimento-exploratorio.sh
 ```
 
-## Resultado (OpenSSL 3.6.4, macOS arm64, certificado ECDSA P-256)
+## Resultado (OpenSSL 3.6.4, macOS arm64, certificado ECDSA P-256 fixo)
+
+As colunas de ClientHello e ServerHello são determinísticas (repetem byte a byte). As colunas de total por direção servem de referência: o total do servidor varia poucos bytes entre execuções, pelo motivo explicado adiante.
 
 | Grupo | ClientHello (B) | ServerHello (B) | Total do cliente (B) | Total do servidor (B) |
 |-------|-----------------|-----------------|----------------------|-----------------------|
-| X25519 | 210 | 122 | 262 | 658 |
-| MLKEM768 | 1356 | 1178 | 1408 | 1729 |
-| X25519MLKEM768 | 1388 | 1210 | 1440 | 1759 |
-| SecP256r1MLKEM768 | 1421 | 1243 | 1473 | 1793 |
+| X25519 | 210 | 122 | 262 | ~657 |
+| MLKEM768 | 1356 | 1178 | 1408 | ~1727 |
+| X25519MLKEM768 | 1388 | 1210 | 1440 | ~1759 |
+| SecP256r1MLKEM768 | 1421 | 1243 | 1473 | ~1792 |
 
 ## O resultado inesperado
 
@@ -34,14 +36,35 @@ openssl s_client -connect localhost:PORTA -tls1_3 -groups X25519 -trace
 
 O resultado mostra que "o custo da migração" não é só somar tamanhos de chave, e que observar o tráfego real corrige a conta feita de cabeça.
 
-## Variação entre execuções
+## Variação entre execuções e a métrica estável
 
-ClientHello e ServerHello são estáveis, mas o total do servidor oscilou 1 a 2 bytes entre duas execuções (por exemplo 658 e 657 para X25519). A hipótese de trabalho, **ainda a confirmar**, é que a assinatura ECDSA do CertificateVerify tem tamanho variável em DER (70 a 72 bytes) e o script gera um certificado novo a cada execução. É um exemplo de por que o desenho experimental exige repetições, e não uma medida única.
+ClientHello e ServerHello são **determinísticos**: repetem byte a byte entre execuções. O **total do servidor**, porém, oscila 1 a 2 bytes (por exemplo 656, 656, 658 para X25519 em três execuções).
+
+A causa foi isolada com certificado fixo. Fixar o certificado **não** eliminou a oscilação, o que descarta o certificado como origem. A variação vem do **CertificateVerify**, a assinatura ECDSA do transcript do handshake: medida em três handshakes, teve 78, 79 e 80 bytes (0x4e, 0x4f, 0x50). Uma assinatura ECDSA é um par de inteiros `(r, s)` codificados em DER, e cada inteiro ocasionalmente ocupa um byte a menos. É uma propriedade do esquema de assinatura, não um erro de medição.
+
+Consequência metodológica: a conclusão sobre o custo da troca de chaves se apoia em **ClientHello e ServerHello**, que são estáveis e onde o key share aparece. O total por direção é informado como referência, com a ressalva de que o CertificateVerify o faz variar em poucos bytes. O certificado é fixo e reusado entre execuções, para que a única variável seja o grupo de troca de chaves.
 
 ## Ameaças à validade
 
 - Um único certificado, uma única biblioteca, loopback.
 - Os bytes são de **mensagens de handshake**, sem cabeçalho de registro TLS, TCP e IP. A contagem em pacotes de rede pode ser conferida com `tcpdump`.
+
+## Validação cruzada: o key share não é artefato do OpenSSL
+
+Para checar que o custo em bytes não depende da implementação nativa do OpenSSL, a medição foi repetida forçando o **liboqs** via `oqs-provider` (carregado sob demanda, sem mudar a biblioteca de referência). Comparando as extensões do ClientHello no grupo MLKEM768:
+
+| Extensão | Nativo | oqs-provider |
+|----------|--------|--------------|
+| `key_share` | 1190 B | **1190 B** (igual) |
+| `signature_algorithms` | 42 B | 192 B (+150) |
+
+O **`key_share` é idêntico** e o ServerHello também (1178/1210/1243 B nos três grupos pós-quânticos). O custo real da troca de chaves, que é o que a H1 mede, **coincide entre as duas implementações**.
+
+A única diferença, +150 B no ClientHello, está toda em `signature_algorithms`: ao carregar, o oqs-provider anuncia assinaturas PQC extras (ML-DSA etc.), o que nada tem a ver com a troca de chaves e **reforça a H1** (o custo vem do key share, não do resto). É o mesmo tipo de achado dos 6 bytes: só o tráfego real mostra onde o custo está.
+
+<Callout title="Papel do liboqs nesta pesquisa">
+  O OpenSSL 3.6 nativo permanece a biblioteca de referência. O liboqs/oqs-provider entra como **fonte** e como **validação cruzada**, não como segunda biblioteca de medição. Ver [escopo](/docs/artigo/escopo) e [leituras](/docs/artigo/leituras).
+</Callout>
 
 ## Para entender o que se mede
 

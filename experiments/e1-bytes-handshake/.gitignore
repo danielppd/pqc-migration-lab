@@ -1,0 +1,4 @@
+# binarios de terceiros compilados do fonte (oqs-provider + liboqs, ~16 MB).
+# Recriados conforme o README (secao "Como o oqs-provider foi compilado").
+oqs/
+cert/

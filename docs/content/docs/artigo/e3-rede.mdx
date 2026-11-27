@@ -1,11 +1,13 @@
 ---
 title: E3, latência sob rede emulada
-description: O experimento mais arriscado, previsto para a semana 3
+description: Latência e segmentos TCP do handshake sob RTT, perda e MTU controlados
 ---
+
+Este experimento mede o tempo do handshake TLS 1.3 e o número de segmentos TCP sob condições de rede controladas. Testa a [hipótese H3](/docs/artigo/pergunta-e-hipoteses): sem perda, o híbrido não adiciona RTT; a penalidade aparece com perda de pacotes ou MTU reduzida.
 
 ## Desenho
 
-Docker com `--cap-add=NET_ADMIN` e `tc netem`, variando:
+Dois containers (cliente e servidor) numa rede dedicada, ambos com OpenSSL 3.5.9. As condições de rede são aplicadas nas duas pontas com `tc netem`, variando:
 
 | Fator | Valores |
 |-------|---------|
@@ -13,22 +15,43 @@ Docker com `--cap-add=NET_ADMIN` e `tc netem`, variando:
 | Perda de pacotes | 0%, 1% e 3% |
 | MTU | 1500 e 1280 |
 
-**Métricas:** tempo até o fim do handshake e número de segmentos TCP (capturados com `tcpdump`). O OpenSSL do container precisa ser da versão **3.5 ou superior**.
+**Métricas:** tempo até o fim do handshake e número de segmentos TCP, capturados com `tcpdump`.
 
 ## Por que perda e MTU
 
-A hipótese H3 diz que o híbrido não adiciona RTT enquanto o voo do servidor cabe na janela inicial de congestionamento (10 segmentos, [RFC 6928](https://www.rfc-editor.org/rfc/rfc6928)). Com **MTU de 1280**, o ClientHello de cerca de 1,4 KB passa a ocupar **dois segmentos**. Com **perda**, mais segmentos significam maior chance de perder algum e pagar uma retransmissão.
+A H3 diz que o híbrido não adiciona RTT enquanto o voo do servidor cabe na janela inicial de congestionamento (10 segmentos, [RFC 6928](https://www.rfc-editor.org/rfc/rfc6928)). Com **MTU de 1280**, o ClientHello de cerca de 1,4 KB passa a ocupar mais de um segmento. Com **perda**, mais segmentos significam maior chance de perder algum e pagar uma retransmissão.
+
+## Dois cuidados ao medir em rede virtualizada
+
+A emulação roda sobre a rede virtualizada do Docker Desktop no macOS, que impõe dois cuidados de método:
+
+1. **O offload de checksum quebra o `netem`.** O checksum TCP é calculado por offload, tarde. O `netem` atrasa ou reordena pacotes com o checksum ainda não preenchido, e o par os descarta: o handshake não completa. A correção é desligar o offload de checksum e de segmentação na interface antes de aplicar o `netem`.
+2. **A contagem de segmentos é feita por janela de tempo.** Capturar com `tcpdump` gravando em arquivo e encerrar por sinal não esvazia o buffer a tempo no ambiente dos containers. A contagem usa a saída do `tcpdump` numa janela fixa.
+
+## Resultado do piloto
+
+RTT de 20 ms. Segmentos TCP (mediana), que é o mecanismo central da H3:
+
+| MTU | X25519 | X25519MLKEM768 |
+|-----|--------|----------------|
+| 1500 | 16 | 18 |
+| 1280 | 16 | 20 |
+
+O híbrido usa mais segmentos TCP, por causa do ClientHello maior. Com **MTU 1280**, o número sobe para 20: o ClientHello passa a ocupar mais de um segmento, como o desenho previa. Com 0% de perda e MTU 1500, os tempos do híbrido e da base ficam indistinguíveis dentro do intervalo de confiança, consistente com a H3.
+
+<Callout title="É um piloto, não a rodada final">
+  O piloto valida a infraestrutura e o mecanismo. A rodada final cobre a matriz completa (RTT 20 e 100 ms, perda 0/1/3%, MTU 1500 e 1280, mais repetições) com ordem aleatorizada, para os números finais com intervalo de confiança estreito.
+</Callout>
+
+## Plano B em reserva
+
+Caso a emulação se mostrasse inviável, o plano B seria um modelo analítico (RTT mais número de segmentos pela janela inicial), validado com poucas medições e com a limitação declarada. A infraestrutura funcionou no piloto, então o plano B permanece apenas como reserva.
 
 ## Aprender netem
 
 <Video id="jwAe8bP8Dp4" title="TC Explained: Linux Traffic Control, Queuing Disciplines (qdisc) and NetEm Emulation" meta="Novatron IT, 5 min, inglês" />
 
-## Riscos
-
-<Callout type="warn" title="É o mais arriscado">
-  Configurar rede emulada dá trabalho, principalmente no macOS (o Docker roda numa VM). Se a configuração travar, o **plano B** é um modelo analítico (RTT mais número de segmentos pela janela inicial), validado com poucas medições e com a limitação declarada. O estudo permanece válido.
-</Callout>
-
 <Cards>
+  <Card title="Código do E3" href="https://github.com/danielppd/pqc-migration-lab/tree/main/experiments/e3-rede" />
   <Card title="Riscos e plano B" href="/docs/artigo/riscos" />
 </Cards>

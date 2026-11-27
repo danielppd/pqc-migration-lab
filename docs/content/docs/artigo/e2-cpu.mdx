@@ -1,39 +1,62 @@
 ---
 title: E2, tempo de CPU em loopback
-description: Plano do experimento da semana 2 e o principal cuidado de método
+description: Custo de CPU do handshake por grupo de troca de chaves
 ---
+
+Este experimento mede o custo de **CPU** do handshake TLS 1.3 para cada grupo de troca de chaves, isolado do custo de rede. Testa a [hipótese H2](/docs/artigo/pergunta-e-hipoteses).
 
 ## Desenho
 
 | Elemento | Definição |
 |----------|-----------|
 | Variável independente | Grupo de troca de chaves |
-| Variável dependente | Tempo de handshake completo |
+| Variável dependente | Tempo do handshake completo |
 | Linha de base | X25519 |
 | Condições | X25519, X25519MLKEM768, MLKEM768, SecP256r1MLKEM768 |
 
-## O cuidado de método que importa
+A autenticação é mantida clássica (certificado ECDSA P-256), para que o tempo medido reflita a troca de chaves, não a assinatura.
 
-<Callout type="warn" title="Não meça repetindo openssl s_client num loop">
-  O custo de abrir um processo (alguns milissegundos) esconde diferenças de microssegundos, que é justamente a escala da diferença a ser medida. Além disso, o `openssl s_time` **não permite escolher o grupo** de troca de chaves.
+## Como o tempo é medido
+
+<Callout type="warn" title="Repetir openssl s_client num loop não serve">
+  O custo de abrir um processo (alguns milissegundos) esconde diferenças de microssegundos, que é a escala da diferença entre os grupos. O `openssl s_time` também não permite escolher o grupo de troca de chaves.
 </Callout>
 
-É necessário um cliente que faça **muitos handshakes no mesmo processo** e cronometre cada um. A escolha e a justificativa dessa ferramenta é uma das decisões metodológicas da segunda semana. Um candidato é o `crypto/tls` do Go, que oferece X25519MLKEM768 (a confirmar na versão instalada).
+A medição usa um harness em C sobre o OpenSSL 3.6 que faz muitos handshakes **no mesmo processo**. Cliente e servidor são dois objetos TLS ligados por um par de buffers em memória, sem socket TCP: sem syscalls de rede nem agendamento de kernel entre as mensagens. O tempo de cada handshake vem de um relógio monotônico de alta resolução. Assim o que se mede é a computação do handshake, que é o que a H2 questiona.
 
 ## Estatística
 
 <Steps>
-  <Step>Pelo menos **30 execuções** por condição.</Step>
-  <Step>**Ordem aleatorizada** das condições.</Step>
-  <Step>**Descartar aquecimento.**</Step>
+  <Step>Pelo menos **30 execuções** por condição (o piloto usou 200).</Step>
+  <Step>**Ordem aleatorizada e intercalada:** a cada rodada, a ordem dos grupos é embaralhada e mede-se um handshake de cada. Nenhuma condição ocupa sempre o início (frio) ou o fim (quente), então deriva térmica não vira diferença sistemática entre grupos.</Step>
+  <Step>**Descartar o aquecimento** (as primeiras rodadas).</Step>
   <Step>Reportar **mediana e IC 95% por bootstrap**.</Step>
+  <Step>Confrontar a diferença de medianas com o limiar de **1 ms** da H2.</Step>
 </Steps>
 
-## Limitação a declarar
+## Resultado do piloto
 
-No macOS não é possível fixar a frequência da CPU, desligar o turbo nem isolar um núcleo, como o checklist de rigor pede. A limitação é registrada nas ameaças à validade e, se possível, as medições finais são repetidas em Linux (VM ou nuvem).
+200 rodadas (um handshake por grupo em cada), ordem aleatorizada, macOS arm64, aquecimento de 20 rodadas descartado.
+
+| Grupo | Mediana (ms) | IC 95% (ms) | Δ vs X25519 (ms) |
+|-------|--------------|-------------|------------------|
+| X25519 | 0,202 | 0,202–0,204 | — |
+| MLKEM768 | 0,207 | 0,206–0,208 | +0,005 |
+| X25519MLKEM768 | 0,277 | 0,276–0,278 | **+0,075** |
+| SecP256r1MLKEM768 | 0,285 | 0,285–0,287 | +0,083 |
+
+O híbrido X25519MLKEM768 adiciona cerca de **+0,075 ms** de CPU sobre a base, uma ordem de grandeza abaixo do limiar de 1 ms: o piloto **sustenta a H2**. A diferença entre os grupos é da ordem de dezenas de microssegundos, duas a três ordens de grandeza menor que qualquer RTT realista.
+
+<Callout title="É um piloto, não a rodada final">
+  O piloto valida o método e a escala da medição. Os valores absolutos dependem da máquina; a rodada final é executada em Linux, onde é possível fixar a frequência da CPU, desligar o turbo e isolar um núcleo, condições que o macOS não permite. A conclusão da H2 não depende desse controle, porque a margem até o limiar é de uma ordem de grandeza.
+</Callout>
+
+## Limitação de plataforma
+
+No macOS não se pode fixar a frequência da CPU, desligar o turbo nem isolar um núcleo, como o rigor experimental pede. A limitação está registrada nas [ameaças à validade](/docs/artigo/riscos); as medições finais são repetidas em Linux.
 
 <Cards>
+  <Card title="Código do E2" href="https://github.com/danielppd/pqc-migration-lab/tree/main/experiments/e2-cpu" />
   <Card title="Rigor experimental" href="/docs/aulas/aula-01-criptografia-moderna/rigor-experimental" />
   <Card title="Hipótese H2" href="/docs/artigo/pergunta-e-hipoteses" />
 </Cards>

@@ -1,0 +1,100 @@
+---
+title: Anatomia do artigo
+description: Estrutura, introdução, fundamentação e trabalhos relacionados, revisão da literatura, reprodutibilidade e resultados
+---
+
+Cada seção de um artigo responde a uma pergunta do leitor. Quando se sabe a pergunta, sabe-se o que escrever.
+
+## A estrutura e a pergunta de cada seção
+
+| Seção | Pergunta do leitor | O que contém |
+|-------|--------------------|--------------|
+| Resumo | Em 30 segundos? | Problema, método, principal resultado e conclusão, em cerca de 200 palavras |
+| Introdução | Por que importa? | Contexto, lacuna, objetivo e lista de contribuições |
+| Fundamentação | O que preciso saber? | Só os conceitos que o leitor usa para entender o trabalho |
+| Trabalhos relacionados | O que já existe? | Quem atacou o mesmo problema e o que ficou faltando |
+| Metodologia | Como foi feito? | Detalhe suficiente para outra pessoa repetir |
+| Resultados | O que apareceu? | Dados, tabelas e gráficos, sem interpretação |
+| Discussão | O que significa? | Interpretação, limitações e ameaças à validade |
+| Conclusão | E agora? | Resposta à pergunta e trabalhos futuros |
+
+## A introdução em quatro movimentos
+
+Um roteiro clássico de escrita acadêmica, inspirado no modelo CARS de John Swales.
+
+<Steps>
+  <Step>**Contexto.** Por que a área importa. Exemplo: vazamentos de senhas acontecem todo ano, e muitos sistemas ainda usam MD5 ou SHA-1.</Step>
+  <Step>**Lacuna.** O que ainda não se sabe. Exemplo: pouca gente mediu, num computador comum, quanto cada função atrasa um atacante.</Step>
+  <Step>**Objetivo.** O que este trabalho faz. Exemplo: medir o ataque de dicionário contra MD5, SHA-256, bcrypt e Argon2 num notebook.</Step>
+  <Step>**Contribuições.** Lista explícita do que é novo. Exemplo: (i) medição reprodutível; (ii) efeito do fator de custo; (iii) código e dados abertos.</Step>
+</Steps>
+
+<Callout title="Escreva as contribuições como lista">
+  O revisor vai procurar por elas.
+</Callout>
+
+## Fundamentação e trabalhos relacionados
+
+Duas seções que quase todo mundo confunde. Uma ensina as ferramentas, a outra apresenta os concorrentes.
+
+| | Fundamentação teórica | Trabalhos relacionados |
+|---|----------------------|------------------------|
+| Papel | O que o leitor precisa saber | Quem já tentou o mesmo |
+| Conteúdo | Conceitos e métricas que o trabalho usa, em tom de livro-texto, curto e citando as fontes clássicas | Artigos que atacam o mesmo problema ou usam o mesmo método, com o que fizeram, o que faltou e como o trabalho difere |
+| Erro comum | Cinco páginas sobre a cifra de César num artigo sobre bcrypt | Listar artigos um a um, sem comparar nem mostrar a lacuna |
+
+## Como achar os trabalhos relacionados
+
+Uma busca sistemática em quatro passos, mesmo para um artigo de disciplina.
+
+<Steps>
+  <Step>**Buscar.** IACR ePrint, Google Scholar, IEEE Xplore e ACM DL, com uma string de busca definida.</Step>
+  <Step>**Filtrar.** Título, resumo e texto completo, com critérios de inclusão e exclusão escritos antes de começar.</Step>
+  <Step>**Expandir.** Snowballing: referências e citações dos melhores artigos. Grafos de citação ajudam.</Step>
+  <Step>**Sintetizar.** Uma tabela comparativa com esquema, plataforma, métrica, modelo de ameaça, baseline e código aberto.</Step>
+</Steps>
+
+Exemplo de string de busca:
+
+```
+("password hashing" OR "bcrypt" OR "Argon2")
+AND ("dictionary attack" OR "password cracking")
+AND ("benchmark" OR "performance")
+```
+
+## A tabela que mostra a lacuna
+
+Os trabalhos relacionados cabem em uma tabela, e a última linha é o próprio trabalho. A lacuna precisa saltar aos olhos. Cada coluna é um critério de comparação, escolhido para mostrar onde o trabalho é diferente.
+
+| Trabalho | Funções testadas | Computador | Lista de senhas | Varia o custo? | Repetições | Código aberto |
+|----------|------------------|------------|-----------------|----------------|------------|---------------|
+| Autor A (2018) | MD5, SHA-1 | Servidor com GPU | 1 mil | Não | Sim | Não |
+| Autor B (2020) | bcrypt | Notebook | Própria | Não | Não | Sim |
+| Autor C (2022) | SHA-256, bcrypt | Nuvem | 100 mil | Sim | Não | Sim |
+| Autor D (2024) | Argon2 | Servidor | Não usa | Sim | Sim | Não |
+| Este trabalho | MD5, SHA-256, bcrypt, Argon2 | Notebook comum | 10 mil comuns | Sim | Sim | Sim |
+
+Exemplo ilustrativo: os autores e anos são fictícios.
+
+## Metodologia e reprodutibilidade
+
+A pergunta central da seção de método é: outra pessoa chega ao mesmo resultado? O resultado depende de detalhes da máquina e do código, e todos precisam ser anotados.
+
+| Dimensão | O que relatar |
+|----------|---------------|
+| Ambiente | Versões da linguagem e das bibliotecas, fixadas num arquivo de dependências |
+| Plataforma | Modelo do computador, processador, memória e sistema, ligado na tomada, sem modo economia |
+| Execução | Número de repetições, como o tempo foi medido e os parâmetros de cada função |
+| Artefatos | Código, dados brutos e os scripts que geram cada figura, em repositório público |
+
+## Resultados que convencem
+
+Resultados descrevem, a discussão interpreta. Gráficos respondem à pergunta, sempre com incerteza e comparação.
+
+- **Sempre com incerteza.** Mediana e intervalo interquartil, sobre 30 execuções ou mais.
+- **Sempre com baseline.** A alternativa aparece ao lado, na mesma máquina e com a mesma entrada.
+- **Uma tendência, não um ponto.** Mostrar como a medida muda com o parâmetro (fator de custo, tamanho da entrada).
+
+<Callout title="Aplicação no artigo" type="success">
+  A seção Artigo segue esta anatomia: introdução com contexto, lacuna, objetivo e contribuição; um método reprodutível com versão de biblioteca fixada; resultados em tabela antes da interpretação; e a tabela comparativa com a literatura (Cloudflare e outros) como forma de mostrar a lacuna.
+</Callout>

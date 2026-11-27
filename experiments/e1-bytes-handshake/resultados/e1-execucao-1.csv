@@ -1,0 +1,7 @@
+# OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)
+# usando certificado fixo existente em cert/
+grupo,client_hello_B,server_hello_B,bytes_cliente_total,bytes_servidor_total
+X25519,210,122,262,657
+MLKEM768,1356,1178,1408,1727
+X25519MLKEM768,1388,1210,1440,1760
+SecP256r1MLKEM768,1421,1243,1473,1791

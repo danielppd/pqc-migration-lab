@@ -1,0 +1,100 @@
+---
+title: Fundamentos do método
+description: Artigo, ciclo científico, pergunta, hipótese, desenho experimental, baseline e validade
+---
+
+Antes de escolher o algoritmo, escolhe-se a pergunta. O resto do artigo existe para respondê-la.
+
+## O que é um artigo
+
+Um artigo é uma afirmação com evidência. Não é um tutorial nem um resumo da teoria, e sim uma contribuição que outra pessoa consegue verificar.
+
+| Ainda não é um artigo | É um artigo |
+|-----------------------|-------------|
+| Explicar como o AES ou o RSA funcionam, implementar o exemplo do livro e mostrar que a mensagem cifra e decifra | Uma pergunta que ninguém respondeu exatamente assim, um método claro e evidências que sustentam, ou derrubam, a resposta |
+
+<Callout title="O teste">
+  Se não é possível dizer, em uma frase, o que se descobriu que não se sabia antes, ainda não é um artigo. O ponto não é ser genial, e sim ser específico, honesto e reproduzível.
+</Callout>
+
+## O ciclo científico
+
+O método não é uma linha reta, e sim um ciclo: cada resultado gera a próxima pergunta.
+
+<Steps>
+  <Step>**Observar.** Algo intriga ou falta na literatura.</Step>
+  <Step>**Perguntar.** Delimitar o que se quer saber.</Step>
+  <Step>**Hipotetizar.** Formular uma resposta testável e falsificável.</Step>
+  <Step>**Experimentar.** Desenho controlado, com baseline.</Step>
+  <Step>**Analisar.** Estatística, não impressão.</Step>
+  <Step>**Concluir.** Responder à pergunta e dizer os limites.</Step>
+</Steps>
+
+Um resultado negativo bem feito também é contribuição.
+
+## Da curiosidade à pergunta testável
+
+Quanto mais específica a pergunta, mais fácil desenhar o experimento e terminar o artigo. O mesmo tema pode ser formulado em três níveis:
+
+| Nível | Exemplo | Problema |
+|-------|---------|----------|
+| Vaga | "Guardar senhas com hash é seguro?" | Ampla demais, impossível de responder em um semestre |
+| Melhor | "O bcrypt é melhor que o SHA-256 para senhas?" | Faltam métrica, escala e comparação |
+| Testável | "Num notebook comum, testar uma lista de 10 mil senhas comuns contra hashes bcrypt (custo 12) leva pelo menos 1000 vezes mais tempo do que contra hashes SHA-256?" | Específica e mensurável |
+
+<Callout title="A boa pergunta tem quatro elementos">
+  Escopo, métrica, comparação e condições.
+</Callout>
+
+## Hipótese
+
+Uma hipótese é a aposta que o experimento pode perder. Se nenhum resultado possível a contraria, ela não é uma hipótese.
+
+| | Definição | Exemplo |
+|---|-----------|---------|
+| H₁, hipótese de pesquisa | A aposta principal | Num notebook comum, testar 10 mil senhas contra bcrypt (custo 12) leva pelo menos 1000 vezes mais tempo que contra SHA-256 |
+| H₀, hipótese nula | O contrário, que o experimento tenta rejeitar | O bcrypt atrasa o ataque menos de 1000 vezes |
+
+Uma boa hipótese é **falsificável** (existe um resultado que mostraria o erro; "bcrypt é mais seguro", sem número, nunca é falsa), **mensurável** (diz qual número será medido), **delimitada** (fixa as condições) e **ancorada** na literatura (nasce de uma lacuna real).
+
+## Desenho experimental
+
+O que muda, o que se mede e o que fica fixo. Detalhes que parecem bobos, como a versão da biblioteca, também precisam ser fixados e relatados.
+
+| Tipo de variável | O que é | Exemplo |
+|------------------|---------|---------|
+| Independente | O que se varia de propósito (causa) | Função de hash, fator de custo, tamanho da senha |
+| Dependente | O que se mede (efeito) | Senhas testadas por segundo, tempo para quebrar, memória |
+| De controle | O que fica fixo (confiança) | Mesmo notebook, mesma lista, mesma versão das bibliotecas, número de repetições |
+
+<Callout type="warn" title="Regra de ouro">
+  Mude uma coisa de cada vez. Senão, não se sabe o que causou o resultado.
+</Callout>
+
+## Baselines
+
+A comparação justa é o coração do artigo. A maioria dos artigos fracos cai em uma destas seis armadilhas.
+
+| Armadilha | O que é |
+|-----------|---------|
+| Baseline fraco | Comparar o próprio código em C com o do concorrente em Python puro. Usar a mesma linguagem e biblioteca |
+| Problema trivial | Testar só senhas de 4 dígitos. No mundo real, as listas têm milhões de senhas comuns |
+| Máquina instável | Navegador aberto, modo economia de bateria e outros programas distorcem tempos. Fechar tudo e relatar o ambiente |
+| Uma medição só | Uma execução não é resultado. Repetir centenas de vezes e reportar mediana e dispersão |
+| Custos escondidos | Olhar só o tempo e esquecer a memória. O Argon2 é forte justamente porque gasta memória de propósito |
+| "Seguro" fácil | Um ataque que falhou não prova que o sistema é seguro. Dizer contra qual atacante se testou |
+
+## Validade
+
+Toda pesquisa tem limites. Reconhecê-los antes do revisor aumenta a credibilidade do artigo.
+
+| Tipo de validade | Pergunta | Exemplo de ameaça |
+|------------------|----------|-------------------|
+| Interna | O resultado veio do que eu mudei? | O MD5 rodou em C e o bcrypt em Python |
+| Externa | Generaliza para outros casos? | Só um notebook e uma lista de senhas |
+| De construto | Medi o que queria medir? | Medir o tempo de um hash e chamar de "tempo para quebrar" |
+| De conclusão | A estatística sustenta a conclusão? | Dez execuções e nenhum teste de significância |
+
+<Callout title="Aplicação no artigo" type="success">
+  A pergunta de pesquisa, as hipóteses H1 a H3 e o critério de refutação do artigo seguem este modelo. O experimento de bytes fixa a biblioteca (OpenSSL 3.6.4), repete três execuções e separa o que varia do que fica fixo, e a seção de limitações declara as ameaças à validade antes da avaliação.
+</Callout>

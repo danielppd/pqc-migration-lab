@@ -1,0 +1,6 @@
+# OpenSSL 3.6.4 25 Aug 2026 (Library: OpenSSL 3.6.4 25 Aug 2026)
+# oqs-provider: 0.13.0-dev
+grupo,client_hello_B,server_hello_B,bytes_cliente_total,bytes_servidor_total
+MLKEM768,1506,1178,1558,1713
+X25519MLKEM768,1538,1210,1590,1758
+SecP256r1MLKEM768,1571,1243,1623,1790
